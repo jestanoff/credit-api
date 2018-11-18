@@ -4,7 +4,7 @@
   "description": "### **POST /api/cards**",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,6 +18,10 @@
   },
   "homepage": "https://gitlab.com/jestanoff/carwash-api#readme",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "joi": "^14.0.6"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.6"
   }
 }
