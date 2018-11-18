@@ -1,0 +1,23 @@
+{
+  "name": "carwash-api",
+  "version": "1.0.0",
+  "description": "### **POST /api/cards**",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/jestanoff/carwash-api.git"
+  },
+  "author": "Stefan Dzhestanov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/jestanoff/carwash-api/issues"
+  },
+  "homepage": "https://gitlab.com/jestanoff/carwash-api#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
