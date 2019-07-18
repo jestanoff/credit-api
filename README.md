@@ -34,11 +34,11 @@ Request
 Response
 ```javascript
 {
-    cardID: ’34bits string’,
+    id: ’34bits string’,
     balance: 50.00,
     dateCreated: ‘1232152412323’,
-    transactions: [],
     status: 200,
+    transactions: [],
 }
 ```
 
@@ -53,11 +53,11 @@ Request
 Response
 ```javascript
 {
-    cardID: ’34bits string’,
+    id: ’34bits string’,
     balance: 50.00,
     dateCreated: ‘1232152412323’,
-    transactions: [],
     status: 200,
+    transactions: [],
 }
 ```
 
@@ -73,15 +73,15 @@ Request
 Response
 ```javascript
 {
-    cardID: ’34bits string’,
+    id: ’34bits string’,
     balance: 39.50,
     dateCreated: ‘1232152412323’,
+    status: 200,
     transactions: [{
-       Datetime: ‘123213123313’,
-       Balance: 25.30,
+       currentBalance: 25.30,
+       date: ‘123213123313’,
        value: 10.50
     }],
-    status: 200,
 }
 ```
 
