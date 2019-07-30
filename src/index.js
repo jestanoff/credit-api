@@ -61,6 +61,10 @@ app.use(authentication)
 
 app.get('/', (req, res) => res.send('Car Wash API!'))
 
-app.get('/api/ids', (req, res) => res.send('Hello'))
+app.get('/api/cards', (req, res) => {
+  res.send({
+    cards: [],
+  });
+})
 
 app.listen(port, () => console.log(`App listening on port ${port}`))
