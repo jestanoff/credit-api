@@ -6,16 +6,16 @@ Request
 ```javascript
 {
     apiKey: 'hash',
-    cardID: ’34bits string’,
     balance: 50.00,
+    cardID: ’34bits string’,
 }
 ```
 
 Response
 ```javascript
 {
-    cardID: ’34bits string’,
     balance: 50.00,
+    cardID: ’34bits string’,
     dateCreated: ‘1232152412323’,
     lastTransactionDate: [],
     status: 201,
@@ -34,9 +34,9 @@ Request
 Response
 ```javascript
 {
-    id: ’34bits string’,
     balance: 50.00,
     dateCreated: ‘1232152412323’,
+    id: ’34bits string’,
     status: 200,
     transactions: [],
 }
@@ -47,15 +47,15 @@ Response
 Request 
 ```javascript
 {
-    apiKey: 'hash',
+    apiKey: 'hash'
 }
 ```
 Response
 ```javascript
 {
-    id: ’34bits string’,
     balance: 50.00,
     dateCreated: ‘1232152412323’,
+    id: ’34bits string’,
     status: 200,
     transactions: [],
 }
@@ -67,20 +67,20 @@ Request
 ```javascript
 {
     apiKey: 'hash',
-    purchase: 10.50
+    purchase: 10.50,
 }
 ```
 Response
 ```javascript
 {
-    id: ’34bits string’,
     balance: 39.50,
     dateCreated: ‘1232152412323’,
+    id: ’34bits string’,
     status: 200,
     transactions: [{
        currentBalance: 25.30,
        date: ‘123213123313’,
-       value: 10.50
+       value: 10.50,
     }],
 }
 ```
