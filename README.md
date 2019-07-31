@@ -6,7 +6,7 @@
 Request
 ```javascript
 {
-  apiKey: 'hash',
+  authKey: 'hash',
 }
 ```
 
@@ -17,7 +17,6 @@ Response
   dateCreated: '2019-07-31T09:25:16.091Z',
   id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
   transactions: [],
-  status: 201,
 }
 ```
 
@@ -27,17 +26,24 @@ Response
 Request 
 ```javascript
 {
-  apiKey: 'hash',
+  authKey: 'hash',
 }
 ```
 
 Response
 ```javascript
 [{
-  balance: 50.00,
+  cardNumber: '10000001',
+  balance: 50,
   dateCreated: '2019-07-31T09:25:16.091Z',
   id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
-  status: 200,
+  transactions: [],
+},
+{
+  cardNumber: '10000002',
+  balance: 20,
+  dateCreated: '2019-06-02T19:32:33.100Z',
+  id: '2D37BC673347-B6FB-SD22-3E6C-5E60A204',
   transactions: [],
 }]
 ```
@@ -48,34 +54,17 @@ Response
 Request 
 ```javascript
 {
-  apiKey: 'hash'
+  authKey: 'hash'
 }
 ```
 Response
 ```javascript
 {
   cardNumber: '10000001',
-  balance: 50.00,
+  balance: 50,
   dateCreated: '2019-07-31T09:25:16.091Z',
   id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
-  status: 200,
   transactions: [],`
-}
-```
-
-## Retrieve account balance
-#### **GET /cards/{id}/balance**
-
-Request 
-```javascript
-{
-  apiKey: 'hash',
-}
-```
-Response
-```javascript
-{
-  balance: 15.30,
 }
 ```
 
@@ -85,9 +74,9 @@ Response
 Request 
 ```javascript
 {
-  apiKey: 'hash',
+  authKey: 'hash',
   body: {
-    amount: 100.00,
+    amount: 100,
   },
 }
 ```
@@ -95,12 +84,11 @@ Response
 ```javascript
 {
   cardNumber: '10000001',
-  balance: 113.50,
+  balance: 113,
   dateCreated: '2019-07-31T09:25:16.091Z',
   id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
-  status: 200,
   transactions: [{
-    amount: 100.00,
+    amount: 100,
     cardId: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
     date: '2019-07-29T09:25:16.091Z',
     id: '0AEAB3F5-3904-486D-8BF5-DCEE2E54444C',
@@ -116,9 +104,9 @@ Response
 Request 
 ```javascript
 {
-  apiKey: 'hash',
+  authKey: 'hash',
   body: {
-    amount: 50.00,
+    amount: 50,
   },
 }
 ```
@@ -126,23 +114,21 @@ Response
 ```javascript
 {
   cardNumber: '10000001',
-  balance: 63.50,
+  balance: 63,
   dateCreated: '2019-07-31T09:25:16.091Z',
   id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
-  status: 200,
   transactions: [{
-    amount: 100.00,
-    cardId: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
+    amount: 100,
     date: '2019-07-29T09:25:16.091Z',
     id: '0AEAB3F5-3904-486D-8BF5-DCEE2E54444C',
-    type: 'deposit',
+    type: 'debit',
   }, {
-    amount: 50.00,
-    cardId: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
+    amount: 50,
     date: '2019-07-29T11:10:15.111Z',
     id: 'ECA23640-BB59-4326-A067-20234D24B7E7',
     type: 'credit',
   }],
 }
+```
 
 e.g. https://github.com/johnph/simple-transaction
