@@ -57,11 +57,18 @@ const port = process.env.port || 3000
 app.use(helmet()); // Helps secure the app by setting various http headers
 app.use(express.json()); // Process res body as JSON
 app.use(morgan('dev')); // Logging requests
+app.get('/', (req, res) => res.send('<h1>Car Wash API</h1>'))
+
 app.use(authentication)
 
-app.get('/', (req, res) => res.send('Car Wash API!'))
 
 app.get('/api/cards', (req, res) => {
+  res.send({
+    cards: [],
+  });
+})
+
+app.post('/api/cards', (req, res) => {
   res.send({
     cards: [],
   });
