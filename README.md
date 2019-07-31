@@ -15,7 +15,8 @@ Response
 {
   balance: 0,
   dateCreated: '2019-07-31T09:25:16.091Z',
-  id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
+  dateUpdated: '2019-07-31T09:25:16.091Z',
+  id: '1000-0000-0000-0001',
   transactions: [],
 }
 ```
@@ -33,17 +34,17 @@ Request
 Response
 ```javascript
 [{
-  cardNumber: '10000001',
   balance: 50,
   dateCreated: '2019-07-31T09:25:16.091Z',
-  id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
+  dateUpdated: '2019-07-31T09:25:16.091Z',
+  id: '1000-0000-0000-0001',
   transactions: [],
 },
 {
-  cardNumber: '10000002',
   balance: 20,
   dateCreated: '2019-06-02T19:32:33.100Z',
-  id: '2D37BC673347-B6FB-SD22-3E6C-5E60A204',
+  dateUpdated: '2019-06-02T19:32:33.100Z',
+  id: '1000-0000-0000-0002',
   transactions: [],
 }]
 ```
@@ -60,10 +61,10 @@ Request
 Response
 ```javascript
 {
-  cardNumber: '10000001',
   balance: 50,
   dateCreated: '2019-07-31T09:25:16.091Z',
-  id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
+  dateUpdated: '2019-07-31T09:25:16.091Z',
+  id: '1000-0000-0000-0001',
   transactions: [],`
 }
 ```
@@ -83,22 +84,21 @@ Request
 Response
 ```javascript
 {
-  cardNumber: '10000001',
   balance: 113,
   dateCreated: '2019-07-31T09:25:16.091Z',
-  id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
+  dateUpdated: '2019-08-01T10:25:16.091Z',
+  id: '1000-0000-0000-0001',
   transactions: [{
     amount: 100,
-    cardId: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
-    date: '2019-07-29T09:25:16.091Z',
+    date: '2019-08-01T10:25:16.091Z',
     id: '0AEAB3F5-3904-486D-8BF5-DCEE2E54444C',
-    type: 'debit',
+    type: 'deposit',
   }],
 }
 ```
 
 
-## Withdraws amount to a card
+## Withdraws amount from a card
 #### **PATCH /cards/{id}/withdraw**
 
 Request 
@@ -113,20 +113,20 @@ Request
 Response
 ```javascript
 {
-  cardNumber: '10000001',
   balance: 63,
   dateCreated: '2019-07-31T09:25:16.091Z',
-  id: 'BC673347-3E6C-4FD5-B6FB-2D375E60A204',
+  dateUpdated: '2019-08-01T10:25:16.091Z',
+  id: '1000-0000-0000-0001',
   transactions: [{
     amount: 100,
     date: '2019-07-29T09:25:16.091Z',
     id: '0AEAB3F5-3904-486D-8BF5-DCEE2E54444C',
-    type: 'debit',
+    type: 'deposit',
   }, {
     amount: 50,
-    date: '2019-07-29T11:10:15.111Z',
+    date: '2019-08-01T10:25:16.091Z',
     id: 'ECA23640-BB59-4326-A067-20234D24B7E7',
-    type: 'credit',
+    type: 'withdraw',
   }],
 }
 ```
