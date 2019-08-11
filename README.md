@@ -6,7 +6,7 @@
 Request
 ```javascript
 {
-  authKey: 'hash',
+  authToken: 'hash',
 }
 ```
 
@@ -27,7 +27,7 @@ Response
 Request 
 ```javascript
 {
-  authKey: 'hash',
+  authToken: 'hash',
 }
 ```
 
@@ -56,7 +56,7 @@ Response
 Request 
 ```javascript
 {
-  authKey: 'hash'
+  authToken: 'hash'
 }
 ```
 Response
@@ -85,7 +85,7 @@ Response
 Request 
 ```javascript
 {
-  authKey: 'hash',
+  authToken: 'hash',
 }
 ```
 Response
@@ -103,7 +103,7 @@ Response
 Request 
 ```javascript
 {
-  authKey: 'hash',
+  authToken: 'hash',
   body: {
     amount: 100,
   },
@@ -125,7 +125,7 @@ Response
 Request 
 ```javascript
 {
-  authKey: 'hash',
+  authToken: 'hash',
   body: {
     amount: 50,
   },
@@ -137,6 +137,25 @@ Response
   balance: 50,
   id: '1000-0000-0000-0001',
   status: 201,
+}
+```
+
+## Authenticate a user
+#### **POST /authenticate**
+Request
+```javascript
+{
+  body: {
+    username: 'admin',
+    password: '12345',
+  },
+}
+```
+Response
+```javascript
+{
+  status: 201,
+  authToken: 'hash',
 }
 ```
 
