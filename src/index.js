@@ -72,23 +72,20 @@ app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Process res body as JSON
-app.use(express.json());
+app.use(bodyParser.json());
 
 
 app.get('/', (req, res) => res.send('<h1>Car Wash API</h1>'));
 
 
 app.post('/api/token', (req, res) => {
-  console.log('Token', req.body);
-  if (req.body.username === 'admin') {
-    if (req.body.password === '12345') {
-      const payload = { check: true };
-      const token = jwt.sign(payload, app.get('Secret'), { expiresIn: 1440 }); // expires in 24h
-
-      res.json({ message: 'Auth done', token });
-    } 
+  if (req.body.username === 'admin' && req.body.password === '12345') {
+    const payload = { check: true };
+    const token = jwt.sign(payload, app.get('Secret'), { expiresIn: 1440 }); // expires in 24h
+    
+    res.json({ message: 'Authentication done', token });
   } else {
-    res.json({ message: 'Username or password not found' });
+    res.status(401).send('Password or Username not found');
   }
 });
 // app.use(authentication);
