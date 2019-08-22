@@ -155,7 +155,8 @@ Response
 ```javascript
 {
   status: 201,
-  authToken: 'hash',
+  message: 'Authentication done',
+  token: 'hash',
 }
 ```
 
