@@ -4,7 +4,6 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const Joi = require('joi'); // use Joi to validate req object on POST/PUT requests
 const helmet = require('helmet');
-const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const authentication = require('./middlewares/authentication');
 const config = require('./configuration/config');
@@ -69,16 +68,37 @@ app.use(helmet());
 app.use(morgan('dev'));
 
 // Parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 // Process res body as JSON
-app.use(bodyParser.json());
+app.use(express.json());
 
+// Routes
+const ProtectedRoutes = express.Router(); 
+app.use('/api', ProtectedRoutes);
+
+ProtectedRoutes.use((req, res, next) => {
+  // Check the header for the token
+  const token = req.get('access-token');
+  if (token) {
+    // Verifies secret and checks if the token is expired
+    jwt.verify(token, app.get('Secret'), (err, decoded) => {
+      if (err) {
+        return res.status(401).send(`Invalid authentication token on ${req.baseUrl}`);
+      } else {
+        // Iif everything is good, save to the request so it can be used in other routes
+        req.decoded = decoded;
+        next();
+      }
+    });
+  } else {
+    res.status(401).send(`No authentication token provided on ${req.method} ${req.originalUrl}`);
+  }
+});
 
 app.get('/', (req, res) => res.send('<h1>Car Wash API</h1>'));
 
-
-app.post('/api/token', (req, res) => {
+app.post('/authenticate', (req, res) => {
   if (req.body.username === 'admin' && req.body.password === '12345') {
     const payload = { check: true };
     const token = jwt.sign(payload, app.get('Secret'), { expiresIn: 1440 }); // expires in 24h
@@ -88,19 +108,17 @@ app.post('/api/token', (req, res) => {
     res.status(401).send('Password or Username not found');
   }
 });
-// app.use(authentication);
 
-
-app.get('/api/cards', (req, res) => {
-  res.send({
-    cards: [],
-  });
+ProtectedRoutes.get('/cards', (req, res) => {
+  res.send('All Cards');
 });
 
-app.post('/api/cards', (req, res) => {
-  res.send({
-    cards: [],
-  });
+ProtectedRoutes.post('/cards', (req, res) => {
+  res.send(`Card has been created with id 1`);
+});
+
+ProtectedRoutes.get('/cards/{id}', (req, res) => {
+  res.send(`Get card with id ${'1'}`);
 });
 
 app.listen(port, () => console.log(`App listening on port ${port}`));
