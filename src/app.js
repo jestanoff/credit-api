@@ -11,6 +11,8 @@ const cards = require('./routes/cards');
 const homepage = require('./routes/homepage');
 
 const app = express();
+const port = process.env.port || 3000;
+app.set('Secret', config.secret); // Sets authentication secret
 
 // Database
 mongoose.connect('mongodb://localhost/carwash', { useNewUrlParser: true })
@@ -56,24 +58,15 @@ const getTransactions = async () => {
 };
 getTransactions();
 
-const port = process.env.port || 3000
 
-// Set secret
-app.set('Secret', config.secret);
+// Middlewares
+app.use(helmet()); // Helps secure the app by setting various http headers
 
-// Express middlewares
+app.use(morgan('dev')); // Use morgan to log requests to the console
 
-// Helps secure the app by setting various http headers
-app.use(helmet());
+app.use(express.urlencoded({ extended: true })); // Parse application/x-www-form-urlencoded
 
-// Use morgan to log requests to the console
-app.use(morgan('dev'));
-
-// Parse application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true }));
-
-// Process res body as JSON
-app.use(express.json());
+app.use(express.json()); // Process res body as JSON
 
 // Routes
 app.get('/', homepage);
