@@ -56,10 +56,10 @@ getTransactions();
 
 const port = process.env.port || 3000
 
-// MIDDLEWARES
-
 // Set secret
 app.set('Secret', config.secret);
+
+// Express middlewares
 
 // Helps secure the app by setting various http headers
 app.use(helmet());
@@ -86,7 +86,7 @@ ProtectedRoutes.use((req, res, next) => {
       if (err) {
         return res.status(401).send(`Invalid authentication token on ${req.baseUrl}`);
       } else {
-        // Iif everything is good, save to the request so it can be used in other routes
+        // If everything is good, save to the request so it can be used in other routes
         req.decoded = decoded;
         next();
       }
@@ -117,8 +117,20 @@ ProtectedRoutes.post('/cards', (req, res) => {
   res.send(`Card has been created with id 1`);
 });
 
-ProtectedRoutes.get('/cards/{id}', (req, res) => {
-  res.send(`Get card with id ${'1'}`);
+ProtectedRoutes.get('/cards/:id', (req, res) => {
+  res.send(`Get card with id #${req.params.id}`);
+});
+
+ProtectedRoutes.get('/cards/:id/balance', (req, res) => {
+  res.send(`The balance of card #${req.params.id} is ${req.params.id * 1.33} credits`);
+});
+
+ProtectedRoutes.post('/cards/:id/deposit', (req, res) => {
+  res.send(`Deposited to card #${req.params.id}, ${req.params.id * 0.63} credits`);
+});
+
+ProtectedRoutes.post('/cards/:id/withdraw', (req, res) => {
+  res.send(`Withdrew from card #${req.params.id}, ${req.params.id * 0.77} credits`);
 });
 
 app.listen(port, () => console.log(`App listening on port ${port}`));
