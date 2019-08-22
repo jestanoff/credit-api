@@ -4,9 +4,11 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const Joi = require('joi'); // use Joi to validate req object on POST/PUT requests
 const helmet = require('helmet');
-const jwt = require('jsonwebtoken');
 const authentication = require('./middlewares/authentication');
+const authorization = require('./middlewares/authorization');
 const config = require('./configuration/config');
+const cards = require('./routes/cards');
+const homepage = require('./routes/homepage');
 
 const app = express();
 
@@ -74,63 +76,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Routes
+app.get('/', homepage);
+app.post('/authenticate', authentication);
+
 const ProtectedRoutes = express.Router(); 
 app.use('/api', ProtectedRoutes);
 
-ProtectedRoutes.use((req, res, next) => {
-  // Check the header for the token
-  const token = req.get('access-token');
-  if (token) {
-    // Verifies secret and checks if the token is expired
-    jwt.verify(token, app.get('Secret'), (err, decoded) => {
-      if (err) {
-        return res.status(401).send(`Invalid authentication token on ${req.baseUrl}`);
-      } else {
-        // If everything is good, save to the request so it can be used in other routes
-        req.decoded = decoded;
-        next();
-      }
-    });
-  } else {
-    res.status(401).send(`No authentication token provided on ${req.method} ${req.originalUrl}`);
-  }
-});
-
-app.get('/', (req, res) => res.send('<h1>Car Wash API</h1>'));
-
-app.post('/authenticate', (req, res) => {
-  if (req.body.username === 'admin' && req.body.password === '12345') {
-    const payload = { check: true };
-    const token = jwt.sign(payload, app.get('Secret'), { expiresIn: 1440 }); // expires in 24h
-    
-    res.json({ message: 'Authentication done', token });
-  } else {
-    res.status(401).send('Password or Username not found');
-  }
-});
-
-ProtectedRoutes.get('/cards', (req, res) => {
-  res.send('All Cards');
-});
-
-ProtectedRoutes.post('/cards', (req, res) => {
-  res.send(`Card has been created with id 1`);
-});
-
-ProtectedRoutes.get('/cards/:id', (req, res) => {
-  res.send(`Get card with id #${req.params.id}`);
-});
-
-ProtectedRoutes.get('/cards/:id/balance', (req, res) => {
-  res.send(`The balance of card #${req.params.id} is ${req.params.id * 1.33} credits`);
-});
-
-ProtectedRoutes.post('/cards/:id/deposit', (req, res) => {
-  res.send(`Deposited to card #${req.params.id}, ${req.params.id * 0.63} credits`);
-});
-
-ProtectedRoutes.post('/cards/:id/withdraw', (req, res) => {
-  res.send(`Withdrew from card #${req.params.id}, ${req.params.id * 0.77} credits`);
-});
+ProtectedRoutes.use(authorization);
+ProtectedRoutes.get('/cards', cards.getCards);
+ProtectedRoutes.post('/cards', cards.createCard);
+ProtectedRoutes.get('/cards/:id', cards.getCard);
+ProtectedRoutes.get('/cards/:id/balance', cards.getBalance);
+ProtectedRoutes.post('/cards/:id/deposit', cards.deposit);
+ProtectedRoutes.post('/cards/:id/withdraw', cards.withdraw);
 
 app.listen(port, () => console.log(`App listening on port ${port}`));
