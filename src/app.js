@@ -7,7 +7,7 @@ import helmet from 'helmet';
 import authorization from './middlewares/authorization.js';
 import authentication from './middlewares/authentication.js';
 import config from './configuration/config.js';
-import * as cards from './routes/cards.js';
+import * as card from './routes/card.js';
 import homepage from './routes/homepage.js';
 
 const app = express();
@@ -76,11 +76,11 @@ const ProtectedRoutes = express.Router();
 app.use('/api', ProtectedRoutes);
 
 ProtectedRoutes.use(authorization);
-ProtectedRoutes.get('/cards', cards.getCards);
-ProtectedRoutes.post('/cards', cards.createCard);
-ProtectedRoutes.get('/cards/:id', cards.getCard);
-ProtectedRoutes.get('/cards/:id/balance', cards.getBalance);
-ProtectedRoutes.post('/cards/:id/deposit', cards.deposit);
-ProtectedRoutes.post('/cards/:id/withdraw', cards.withdraw);
+ProtectedRoutes.get('/cards', card.list);
+ProtectedRoutes.post('/cards', card.create);
+ProtectedRoutes.get('/cards/:id', card.show);
+ProtectedRoutes.get('/cards/:id/balance', card.balance);
+ProtectedRoutes.post('/cards/:id/deposit', card.deposit);
+ProtectedRoutes.post('/cards/:id/withdraw', card.withdraw);
 
 app.listen(port, () => console.log(`App listening on port ${port}`));

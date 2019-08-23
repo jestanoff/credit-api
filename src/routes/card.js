@@ -1,16 +1,16 @@
-export const getCards = (req, res) => {
+export const list = (req, res) => {
   res.end('All Cards');
 };
 
-export const createCard = (req, res) => {
+export const create = (req, res) => {
   res.end('Card has been created with id 1');
 };
 
-export const getCard = (req, res) => {
+export const show = (req, res) => {
   res.end(`Get card with id #${req.params.id}`);
 };
 
-export const getBalance = (req, res) => {
+export const balance = (req, res) => {
   res.end(`The balance of card #${req.params.id} is ${req.params.id * 1.33} credits`);
 };
 
