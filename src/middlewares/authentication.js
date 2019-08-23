@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
-module.exports = (req, res, next) => {
+export default (req, res, next) => {
   if (req.body.username === 'admin' && req.body.password === '12345') {
     const payload = { check: true };
     const token = jwt.sign(payload, req.app.get('Secret'), { expiresIn: 1440 }); // expires in 24h

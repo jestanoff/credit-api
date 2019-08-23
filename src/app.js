@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
-const express = require('express');
-const morgan = require('morgan');
-const mongoose = require('mongoose');
-// const Joi = require('joi'); // use Joi to validate req object on POST/PUT requests
-const helmet = require('helmet');
-const authentication = require('./middlewares/authentication');
-const authorization = require('./middlewares/authorization');
-const config = require('./configuration/config');
-const cards = require('./routes/cards');
-const homepage = require('./routes/homepage');
+import express from 'express';
+import morgan from 'morgan';
+import mongoose from 'mongoose';
+// import Joi from 'joi'; // use Joi to validate req object on POST/PUT requests
+import helmet from 'helmet';
+import authorization from './middlewares/authorization.js';
+import authentication from './middlewares/authentication.js';
+import config from './configuration/config.js';
+import * as cards from './routes/cards.js';
+import homepage from './routes/homepage.js';
 
 const app = express();
 const port = process.env.port || 3000;

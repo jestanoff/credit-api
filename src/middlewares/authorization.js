@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
-module.exports = (req, res, next) => {
+export default (req, res, next) => {
   // Check the header for the token
   const token = req.get('access-token');
   if (token) {
@@ -11,9 +11,9 @@ module.exports = (req, res, next) => {
       }
       // If everything is good, save to the request so it can be used in other routes
       req.decoded = decoded;
-      next();
+      return next();
     });
   } else {
-    res.status(401).send(`No authentication token provided on ${req.method} ${req.originalUrl}`);
+    res.status(401).send('No authentication token provided');
   }
 };

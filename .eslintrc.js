@@ -1,6 +1,6 @@
 module.exports = {
   env: {
-    commonjs: true,
+    commonjs: false,
     es6: true,
     node: true,
   },
@@ -15,6 +15,7 @@ module.exports = {
     ecmaVersion: 2018,
   },
   rules: {
-    "arrow-parens": 0, 
+    'arrow-parens': 0, 
+    'import/extensions': 0,
   },
 };
