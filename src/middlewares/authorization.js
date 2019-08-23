@@ -8,11 +8,10 @@ module.exports = (req, res, next) => {
     jwt.verify(token, req.app.get('Secret'), (err, decoded) => {
       if (err) {
         return res.status(401).send(`Invalid authentication token on ${req.baseUrl}`);
-      } else {
-        // If everything is good, save to the request so it can be used in other routes
-        req.decoded = decoded;
-        next();
       }
+      // If everything is good, save to the request so it can be used in other routes
+      req.decoded = decoded;
+      next();
     });
   } else {
     res.status(401).send(`No authentication token provided on ${req.method} ${req.originalUrl}`);

@@ -1,8 +1,8 @@
-
+/* eslint-disable no-console */
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-const Joi = require('joi'); // use Joi to validate req object on POST/PUT requests
+// const Joi = require('joi'); // use Joi to validate req object on POST/PUT requests
 const helmet = require('helmet');
 const authentication = require('./middlewares/authentication');
 const authorization = require('./middlewares/authorization');
@@ -16,45 +16,45 @@ app.set('Secret', config.secret); // Sets authentication secret
 
 // Database
 mongoose.connect('mongodb://localhost/carwash', { useNewUrlParser: true })
-    .then(() => console.log('connected to MongoDB'))
-    .catch(err => console.log('could not connect to MongoDB', err));
+  .then(() => console.log('connected to MongoDB'))
+  .catch(err => console.log('could not connect to MongoDB', err));
 
 const Transaction = mongoose.model('Transaction', new mongoose.Schema({
-    currentBalance: Number,
-    date: { type: Date, default: Date.now },
-    value: Number,
+  currentBalance: Number,
+  date: { type: Date, default: Date.now },
+  value: Number,
 }));
 const transaction = new Transaction({
-    currentBalance: 0,
-    value: 1,
+  currentBalance: 0,
+  value: 1,
 });
 
 const createTransaction = async () => {
-    const result = await transaction.save();
-    console.log(result);
+  const result = await transaction.save();
+  console.log(result);
 };
-// createTransaction();
+createTransaction();
 
 const getTransactions = async () => {
-    /* COMPARISON */
-    // eq (equal)
-    // ne (not equal)
-    // gt (greater than)
-    // gte (greater than or equal to)
-    // lt (less than)
-    // lte (less than or equal to)
-    // in (one of array of values)
-    // nin (not in)
-    /* LOGICAL */
-    // or
-    // and
-    const result = await Transaction
-        .find({ value: { $gte: 0, $lte: 1 } })
-        .or([ { value: 1 }, { currentBalance: 0 } ])
-        .limit(20)
-        .sort({ value: 1 })
-        .select({ date: 1, value: 1 })
-    console.log(result)
+  /* COMPARISON */
+  // eq (equal)
+  // ne (not equal)
+  // gt (greater than)
+  // gte (greater than or equal to)
+  // lt (less than)
+  // lte (less than or equal to)
+  // in (one of array of values)
+  // nin (not in)
+  /* LOGICAL */
+  // or
+  // and
+  const result = await Transaction
+    .find({ value: { $gte: 0, $lte: 1 } })
+    .or([{ value: 1 }, { currentBalance: 0 }])
+    .limit(20)
+    .sort({ value: 1 })
+    .select({ date: 1, value: 1 });
+  console.log(result);
 };
 getTransactions();
 
@@ -72,7 +72,7 @@ app.use(express.json()); // Process res body as JSON
 app.get('/', homepage);
 app.post('/authenticate', authentication);
 
-const ProtectedRoutes = express.Router(); 
+const ProtectedRoutes = express.Router();
 app.use('/api', ProtectedRoutes);
 
 ProtectedRoutes.use(authorization);
