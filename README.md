@@ -1,7 +1,7 @@
 # Car Wash RESTful API
 
 ## Create new card
-#### **POST /cards**
+#### **POST /cards/{id}**
 
 Request
 ```javascript
@@ -161,3 +161,6 @@ Response
 ```
 
 e.g. https://github.com/johnph/simple-transaction
+
+# Client - Server diagrams
+https://docs.google.com/presentation/d/1oUWIE6T0oV_S-eZf13f7RbZdkD03_O2w0njMzLBtVt4/edit?usp=sharing

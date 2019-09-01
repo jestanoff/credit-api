@@ -10,9 +10,9 @@ const TransactionSchema = new Schema(
       type: Number,
     },
     type: {
+      enum: ['deposit', 'withdraw'],
       required: true,
       type: String,
-      enum: ['deposit', 'withdraw'],
     },
   },
   {
@@ -29,6 +29,7 @@ const CardSchema = new Schema(
       min: 0,
       type: Number,
     },
+    barcode: String,
     transactions: {
       type: [TransactionSchema],
     },
@@ -40,25 +41,41 @@ const CardSchema = new Schema(
   },
 );
 const Card = mongoose.model('Card', CardSchema);
+CardSchema.path('barcode', {
+  required: true,
+  type: String,
+  unique: true,
+  validate: {
+    isAsync: true,
+    message: 'Card with this barcode already exists',
+    validator: (value, done) => {
+      Card.findOne({ barcode: value }, (err, card) => {
+        done(!card);
+      });
+    },
+  },
+});
+
 const Transaction = mongoose.model('Transaction', TransactionSchema);
 
 export const getCards = (limit = 50) => Card.find().limit(limit);
 
-export const createCard = () => new Card({}).save();
+export const createCard = barcode => new Card({ barcode }).save();
 
-export const getCard = id => Card.findById(id);
+export const getCard = barcode => Card.findOne({ barcode });
 
-export const amendBalance = async (id, amount) => {
-  const card = await Card.findById(id);
+export const amendBalance = async (barcode, amount) => {
+  const card = await Card.findOne({ barcode });
   const balance = card.balance + amount;
 
   if (balance < 0) return undefined;
 
   card.balance = balance;
-  card.transactions.push(new Transaction({
-    amount: Math.abs(amount),
-    type: Math.sign(amount) === -1 ? 'withdraw' : 'deposit',
-  }));
-  card.save();
-  return card;
+  card.transactions.push(
+    new Transaction({
+      amount: Math.abs(amount),
+      type: Math.sign(amount) === -1 ? 'withdraw' : 'deposit',
+    }),
+  );
+  return card.save();
 };

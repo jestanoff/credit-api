@@ -11,16 +11,28 @@ export const list = (req, res) => {
 };
 
 export const create = (req, res) => {
-  createCard()
-    .then(card => {
-      res.status(401).json(card);
-    })
-    .catch(console.error);
+  if (req.params.barcode) {
+    createCard(req.params.barcode)
+      .then(card => {
+        res.status(201).json(card);
+      })
+      .catch(err => {
+        if (err.name === 'ValidationError') {
+          res
+            .status(409)
+            .json({ code: 'CARD_ALREADY_EXISTS', message: 'Card with this barcode already exists' });
+        } else {
+          throw err;
+        }
+      });
+  } else {
+    res.status(400).end();
+  }
 };
 
 export const show = (req, res) => {
-  if (req.params.id) {
-    getCard(req.params.id)
+  if (req.params.barcode) {
+    getCard(req.params.barcode)
       .then(card => {
         res.status(200).json(card);
       })
@@ -31,10 +43,10 @@ export const show = (req, res) => {
 };
 
 export const balance = (req, res) => {
-  if (req.params.id) {
-    getCard(req.params.id)
+  if (req.params.barcode) {
+    getCard(req.params.barcode)
       .then(card => {
-        res.status(200).json({ balance: card[0].balance });
+        res.status(200).json({ balance: card.balance });
       })
       .catch(console.error);
   } else {
@@ -43,12 +55,17 @@ export const balance = (req, res) => {
 };
 
 export const deposit = async (req, res) => {
-  const card = await amendBalance(req.params.id, req.body.amount);
-  res.status(200).json({ balance: card.balance });
+  amendBalance(req.params.barcode, req.body.amount).then(card => {
+    res.status(200).json({ balance: card.balance });
+  }).catch(() => {
+    res
+      .status(409)
+      .json({ code: 'CARD_ALREADY_EXISTS', message: 'Card with this barcode already exists' });
+  });
 };
 
 export const withdraw = async (req, res) => {
-  const card = await amendBalance(req.params.id, -req.body.amount);
+  const card = await amendBalance(req.params.barcode, -req.body.amount);
 
   if (card) {
     res.status(200).json({ balance: card.balance });

@@ -42,10 +42,10 @@ app.use('/api', ProtectedRoutes);
 
 ProtectedRoutes.use(authorization);
 ProtectedRoutes.get('/cards', card.list);
-ProtectedRoutes.post('/cards', card.create);
-ProtectedRoutes.get('/cards/:id', card.show);
-ProtectedRoutes.get('/cards/:id/balance', card.balance);
-ProtectedRoutes.post('/cards/:id/deposit', card.deposit);
-ProtectedRoutes.post('/cards/:id/withdraw', card.withdraw);
+ProtectedRoutes.post('/cards/:barcode', card.create);
+ProtectedRoutes.get('/cards/:barcode', card.show);
+ProtectedRoutes.get('/cards/:barcode/balance', card.balance);
+ProtectedRoutes.post('/cards/:barcode/deposit', card.deposit);
+ProtectedRoutes.post('/cards/:barcode/withdraw', card.withdraw);
 
 app.listen(port, () => console.log(`App listening on port ${port}`));
