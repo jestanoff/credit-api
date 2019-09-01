@@ -15,18 +15,31 @@ const port = process.env.port || 3000;
 app.set('Secret', config.secret); // Sets authentication secret
 
 // Database
-mongoose.connect('mongodb://localhost/carwash', { useNewUrlParser: true })
-  .then(() => console.log('connected to MongoDB'))
-  .catch(err => console.log('could not connect to MongoDB', err));
+mongoose.connect('mongodb://localhost:27017/carwash', {
+  password: config.dbPassword,
+  useNewUrlParser: true,
+  username: config.dbUsername,
+});
+mongoose.connection.on('error', console.error);
+mongoose.connection.once('open', () => console.log('connected to MongoDB'));
 
 const Transaction = mongoose.model('Transaction', new mongoose.Schema({
-  currentBalance: Number,
+  amount: Number,
   date: { type: Date, default: Date.now },
-  value: Number,
+  id: String,
+  type: String,
 }));
+// eslint-disable-next-line no-unused-vars
+const Card = mongoose.model('Card', new mongoose.Schema({
+  balance: Number,
+  dateCreated: { type: Date, default: Date.now },
+  id: String,
+  transactions: Array,
+}));
+
 const transaction = new Transaction({
-  currentBalance: 0,
-  value: 1,
+  amount: 10,
+  type: 'deposit',
 });
 
 const createTransaction = async () => {
