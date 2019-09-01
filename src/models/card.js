@@ -41,7 +41,11 @@ const CardSchema = new Schema(
 );
 const Card = mongoose.model('Card', CardSchema);
 
+export const getCards = (limit = 50) => Card.find().limit(limit);
+
 export const createCard = () => new Card({}).save();
+
+export const getCard = id => Card.find({ _id: id });
 
 export const getTransactions = async () => {
   /* COMPARISON */
@@ -56,11 +60,10 @@ export const getTransactions = async () => {
   /* LOGICAL */
   // or
   // and
-  const result = await Card.find({ balance: { $gte: 0, $lte: 1 } })
+  await Card.find({ balance: { $gte: 0, $lte: 1 } })
     .or([{ balance: 1 }, { balance: 10 }])
     .limit(20)
     .sort({ balance: 1 })
     .select({ date: 1, balance: 1 });
-  console.log('result', result);
 };
 getTransactions();

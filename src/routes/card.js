@@ -1,19 +1,25 @@
-import { createCard } from '../models/card.js';
+import { createCard, getCard, getCards } from '../models/card.js';
 
 export const list = (req, res) => {
-  res.end('All Cards');
+  getCards().then(cards => {
+    res.status(200).json(cards);
+  }).catch(console.error);
 };
 
 export const create = (req, res) => {
   createCard().then(card => {
     res.status(401).json(card);
-  }).catch(err => {
-    console.error(err);
-  });
+  }).catch(console.error);
 };
 
 export const show = (req, res) => {
-  res.end(`Get card with id #${req.params.id}`);
+  if (req.params.id) {
+    getCard(req.params.id).then(card => {
+      res.status(200).json(card[0]);
+    }).catch(console.error);
+  } else {
+    res.status(400).end();
+  }
 };
 
 export const balance = (req, res) => {

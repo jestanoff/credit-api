@@ -17,5 +17,6 @@ module.exports = {
   rules: {
     'arrow-parens': 0, 
     'import/extensions': 0,
+    'no-console': 0,
   },
 };
