@@ -14,63 +14,15 @@ const app = express();
 const port = process.env.port || 3000;
 app.set('Secret', config.secret); // Sets authentication secret
 
-// Database
+// Database setup
 mongoose.connect('mongodb://localhost:27017/carwash', {
   password: config.dbPassword,
+  useCreateIndex: true,
   useNewUrlParser: true,
   username: config.dbUsername,
 });
 mongoose.connection.on('error', console.error);
 mongoose.connection.once('open', () => console.log('connected to MongoDB'));
-
-const Transaction = mongoose.model('Transaction', new mongoose.Schema({
-  amount: Number,
-  date: { type: Date, default: Date.now },
-  id: String,
-  type: String,
-}));
-// eslint-disable-next-line no-unused-vars
-const Card = mongoose.model('Card', new mongoose.Schema({
-  balance: Number,
-  dateCreated: { type: Date, default: Date.now },
-  id: String,
-  transactions: Array,
-}));
-
-const transaction = new Transaction({
-  amount: 10,
-  type: 'deposit',
-});
-
-const createTransaction = async () => {
-  const result = await transaction.save();
-  console.log(result);
-};
-createTransaction();
-
-const getTransactions = async () => {
-  /* COMPARISON */
-  // eq (equal)
-  // ne (not equal)
-  // gt (greater than)
-  // gte (greater than or equal to)
-  // lt (less than)
-  // lte (less than or equal to)
-  // in (one of array of values)
-  // nin (not in)
-  /* LOGICAL */
-  // or
-  // and
-  const result = await Transaction
-    .find({ value: { $gte: 0, $lte: 1 } })
-    .or([{ value: 1 }, { currentBalance: 0 }])
-    .limit(20)
-    .sort({ value: 1 })
-    .select({ date: 1, value: 1 });
-  console.log(result);
-};
-getTransactions();
-
 
 // Middlewares
 app.use(helmet()); // Helps secure the app by setting various http headers

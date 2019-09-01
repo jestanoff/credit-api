@@ -1,9 +1,15 @@
+import { createCard } from '../models/card.js';
+
 export const list = (req, res) => {
   res.end('All Cards');
 };
 
 export const create = (req, res) => {
-  res.end('Card has been created with id 1');
+  createCard().then(card => {
+    res.status(401).json(card);
+  }).catch(err => {
+    console.error(err);
+  });
 };
 
 export const show = (req, res) => {
