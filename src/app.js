@@ -2,6 +2,8 @@
 import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
+import https from 'https';
+import fs from 'fs';
 // import Joi from 'joi'; // use Joi to validate req object on POST/PUT requests
 import helmet from 'helmet';
 import authorization from './middlewares/authorization.js';
@@ -48,4 +50,8 @@ ProtectedRoutes.get('/cards/:barcode/balance', card.balance);
 ProtectedRoutes.post('/cards/:barcode/deposit', card.deposit);
 ProtectedRoutes.post('/cards/:barcode/withdraw', card.withdraw);
 
-app.listen(port, () => console.log(`App listening on port ${port}`));
+https.createServer({
+  // Generate valid certs from https://letsencrypt.org/
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.cert'),
+}, app).listen(port, () => console.log(`App listening on https://localhost:${port}/`));
