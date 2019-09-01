@@ -40,9 +40,25 @@ const CardSchema = new Schema(
   },
 );
 const Card = mongoose.model('Card', CardSchema);
+const Transaction = mongoose.model('Transaction', TransactionSchema);
 
 export const getCards = (limit = 50) => Card.find().limit(limit);
 
 export const createCard = () => new Card({}).save();
 
-export const getCard = id => Card.find({ _id: id });
+export const getCard = id => Card.findById(id);
+
+export const amendBalance = async (id, amount) => {
+  const card = await Card.findById(id);
+  const balance = card.balance + amount;
+
+  if (balance < 0) return undefined;
+
+  card.balance = balance;
+  card.transactions.push(new Transaction({
+    amount: Math.abs(amount),
+    type: Math.sign(amount) === -1 ? 'withdraw' : 'deposit',
+  }));
+  card.save();
+  return card;
+};
