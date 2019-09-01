@@ -23,7 +23,13 @@ export const show = (req, res) => {
 };
 
 export const balance = (req, res) => {
-  res.end(`The balance of card #${req.params.id} is ${req.params.id * 1.33} credits`);
+  if (req.params.id) {
+    getCard(req.params.id).then(card => {
+      res.status(200).json({ balance: card[0].balance });
+    }).catch(console.error);
+  } else {
+    res.status(400).end();
+  }
 };
 
 export const deposit = (req, res) => {
