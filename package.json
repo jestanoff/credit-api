@@ -4,6 +4,10 @@
   "description": "### **POST /api/cards**",
   "main": "src/app.js",
   "type": "module",
+  "engines": {
+    "node" : ">=v12.0.0"
+  },
+  "engineStrict" : true,
   "scripts": {
     "lint": "eslint src/",
     "start": "nodemon --experimental-modules src/app.js",
