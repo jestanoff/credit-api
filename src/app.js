@@ -43,11 +43,11 @@ app.use('/api', ProtectedRoutes);
 
 ProtectedRoutes.use(authorization);
 ProtectedRoutes.get('/cards', card.list);
-ProtectedRoutes.post('/cards/:barcode', card.create);
-ProtectedRoutes.get('/cards/:barcode', card.show);
-ProtectedRoutes.get('/cards/:barcode/balance', card.balance);
-ProtectedRoutes.post('/cards/:barcode/deposit', card.deposit);
-ProtectedRoutes.post('/cards/:barcode/withdraw', card.withdraw);
+ProtectedRoutes.post('/cards/:id', card.create);
+ProtectedRoutes.get('/cards/:id', card.show);
+ProtectedRoutes.get('/cards/:id/balance', card.balance);
+ProtectedRoutes.post('/cards/:id/deposit', card.deposit);
+ProtectedRoutes.post('/cards/:id/withdraw', card.withdraw);
 
 https.createServer({
   // Generate valid certs from https://letsencrypt.org/

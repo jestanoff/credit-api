@@ -43,8 +43,8 @@ export const show = (req, res) => {
 };
 
 export const balance = (req, res) => {
-  if (req.params.barcode) {
-    getCard(req.params.barcode)
+  if (req.params.id) {
+    getCard(req.params.id)
       .then(card => {
         res.status(200).json({ balance: card.balance });
       })
@@ -55,17 +55,17 @@ export const balance = (req, res) => {
 };
 
 export const deposit = async (req, res) => {
-  amendBalance(req.params.barcode, req.body.amount).then(card => {
+  amendBalance(req.params.id, req.body.amount).then(card => {
     res.status(200).json({ balance: card.balance });
   }).catch(() => {
     res
       .status(409)
-      .json({ code: 'CARD_ALREADY_EXISTS', message: 'Card with this barcode already exists' });
+      .json({ code: 'DEPOSIT_ERROR', message: 'Card with this cardId already exists' });
   });
 };
 
 export const withdraw = async (req, res) => {
-  const card = await amendBalance(req.params.barcode, -req.body.amount);
+  const card = await amendBalance(req.params.id, -req.body.amount);
 
   if (card) {
     res.status(200).json({ balance: card.balance });
