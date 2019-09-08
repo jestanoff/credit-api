@@ -11,10 +11,11 @@
   "scripts": {
     "lint": "eslint src/",
     "start": "nodemon --experimental-modules src/server.js",
-    "test": "jest"
+    "test": "jest --config=jest.config.js",
+    "watch": "jest --config=jest.config.js --watchAll"
   },
   "repository": {
-    "type": "git",
+    "type": "git",  
     "url": "git+https://gitlab.com/jestanoff/carwash-api.git"
   },
   "author": "Stefan Dzhestanov",
