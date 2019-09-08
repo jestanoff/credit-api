@@ -11,8 +11,8 @@ export const list = (req, res) => {
 };
 
 export const create = (req, res) => {
-  if (req.params.barcode) {
-    createCard(req.params.barcode)
+  if (req.params.id) {
+    createCard(req.params.id)
       .then(card => {
         res.status(201).json(card);
       })
@@ -20,7 +20,7 @@ export const create = (req, res) => {
         if (err.name === 'ValidationError') {
           res
             .status(409)
-            .json({ code: 'CARD_ALREADY_EXISTS', message: 'Card with this barcode already exists' });
+            .json({ code: 'CARD_ALREADY_EXISTS', message: err.errors.cardId.message });
         } else {
           throw err;
         }
@@ -31,8 +31,8 @@ export const create = (req, res) => {
 };
 
 export const show = (req, res) => {
-  if (req.params.barcode) {
-    getCard(req.params.barcode)
+  if (req.params.id) {
+    getCard(req.params.id)
       .then(card => {
         res.status(200).json(card);
       })

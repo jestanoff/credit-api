@@ -46,12 +46,11 @@ CardSchema.path('cardId', {
   type: String,
   unique: true,
   validate: {
-    isAsync: true,
-    message: 'Card with this id already exists',
-    validator: (value, done) => {
-      Card.findOne({ cardId: value }, (err, card) => {
-        done(!card);
-      });
+    validator: async (value) => {
+      const card = await Card.findOne({ cardId: value });
+      return card
+        ? Promise.reject(new Error(`Card with id ${card.cardId} already exists`))
+        : Promise.resolve('Card created');
     },
   },
 });
