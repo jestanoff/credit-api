@@ -9,35 +9,27 @@ import server from './index.js';
 jest.mock('express', () => {
   const exp = jest.fn();
   exp.json = jest.fn().mockReturnValue('JSON parsed');
-  exp.Router = jest.fn(() => ({
-    get: jest.fn(),
-    post: jest.fn(),
-    use: jest.fn(),
-  }));
+  exp.Router = jest.fn();
   exp.urlencoded = jest.fn().mockReturnValue('urlencoded');
-
   return exp;
 });
 jest.mock('morgan', () => jest.fn(() => 'log requests'));
 jest.mock('mongoose', () => ({
   connect: jest.fn(),
-  connection: {
-    on: jest.fn(),
-    once: jest.fn(),
-  },
+  connection: { on: jest.fn(), once: jest.fn() },
 }));
 jest.mock('https', () => ({ createServer: jest.fn() }));
 jest.mock('fs', () => ({ readFileSync: jest.fn() }));
 jest.mock('helmet', () => jest.fn(() => 'http headers has been set'));
-jest.mock('./middlewares/authorization.js', () => 'authorization route');
 jest.mock('./middlewares/authentication.js', () => 'authentication route');
+jest.mock('./middlewares/authorization.js', () => 'authorization middleware');
 jest.mock('./routes/card.js', () => ({
-  balance: jest.fn(),
-  create: jest.fn(),
-  deposit: jest.fn(),
-  list: jest.fn(),
-  show: jest.fn(),
-  withdraw: jest.fn(),
+  balance: 'card.balance',
+  create: 'card.create',
+  deposit: 'card.deposit',
+  list: 'card.list',
+  show: 'card.show',
+  withdraw: 'card.withdraw',
 }));
 jest.mock('./routes/homepage.js', () => 'homepage route');
 jest.mock('./configuration/config.js', () => ({
@@ -54,27 +46,27 @@ describe('Server entry point', () => {
       use: jest.fn(),
     },
     listen: jest.fn(),
+    protectedRoutes: {
+      get: jest.fn(),
+      post: jest.fn(),
+      use: jest.fn(),
+    },
   };
 
   beforeEach(() => {
-    fs.readFileSync.mockReturnValue('cert');
-    fs.readFileSync.mockReturnValueOnce('key');
-    process.env = { db: 'mongodb uri', port: '443' };
+    fs.readFileSync.mockReturnValueOnce('key').mockReturnValueOnce('cert');
+    process.env = { db: 'mongodb uri', port: '8000' };
     https.createServer.mockImplementation(() => ({ listen: mocks.listen }));
     express.mockReturnValue(mocks.app);
+    express.Router.mockReturnValue(mocks.protectedRoutes);
 
     server();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  afterEach(jest.clearAllMocks);
 
   describe('Express app', () => {
     test('should setup initialize application', () => {
-      express.mockClear();
-      server();
-
       expect(express).toHaveBeenCalledTimes(1);
       expect(express).toHaveBeenCalledWith();
     });
@@ -118,19 +110,19 @@ describe('Server entry point', () => {
 
     test('should setup listener with the httpsServer', () => {
       expect(mocks.listen).toHaveBeenCalledTimes(1);
+      expect(mocks.listen).toHaveBeenCalledWith(8000, expect.any(Function));
+    });
+
+    test('should listen to port 443 if no process.env.port is passed', () => {
+      process.env.port = undefined;
+      jest.clearAllMocks();
+      server();
+
       expect(mocks.listen).toHaveBeenCalledWith(443, expect.any(Function));
     });
   });
 
   describe('Routes setup', () => {
-    test("should prefix any of the protected routes with '/api'", () => {
-      expect(mocks.app.use).nthCalledWith(5, '/api', {
-        get: expect.any(Function),
-        post: expect.any(Function),
-        use: expect.any(Function),
-      });
-    });
-
     test("should use the homepage route for GET requests to '/'", () => {
       expect(mocks.app.get).toHaveBeenCalledTimes(1);
       expect(mocks.app.get).toHaveBeenCalledWith('/', 'homepage route');
@@ -143,6 +135,41 @@ describe('Server entry point', () => {
 
     test('should create new router for protected routes', () => {
       expect(express.Router).toHaveBeenCalledTimes(1);
+    });
+
+    test("should prefix any of the protected routes with '/api'", () => {
+      expect(mocks.app.use).nthCalledWith(5, '/api', mocks.protectedRoutes);
+    });
+
+    test("should hook 'authorization' middleware to all requests under '/api'", () => {
+      expect(mocks.protectedRoutes.use).toHaveBeenCalledTimes(1);
+      expect(mocks.protectedRoutes.use).toHaveBeenCalledWith('authorization middleware');
+    });
+
+    test("should use card.list route for GET requests to '/cards'", () => {
+      expect(mocks.protectedRoutes.get).toHaveBeenCalledTimes(3);
+      expect(mocks.protectedRoutes.get).nthCalledWith(1, '/cards', 'card.list');
+    });
+
+    test("should use card.create route for POST requests to '/cards/:id'", () => {
+      expect(mocks.protectedRoutes.post).toHaveBeenCalledTimes(3);
+      expect(mocks.protectedRoutes.post).nthCalledWith(1, '/cards/:id', 'card.create');
+    });
+
+    test("should use card.show route for GET requests to '/cards/:id'", () => {
+      expect(mocks.protectedRoutes.get).nthCalledWith(2, '/cards/:id', 'card.show');
+    });
+
+    test("should use card.balance route for GET requests to '/cards/:id'", () => {
+      expect(mocks.protectedRoutes.get).nthCalledWith(3, '/cards/:id/balance', 'card.balance');
+    });
+
+    test("should use card.deposit route for POST requests to '/cards/:id/deposit'", () => {
+      expect(mocks.protectedRoutes.post).nthCalledWith(2, '/cards/:id/deposit', 'card.deposit');
+    });
+
+    test("should use card.withdraw route for POST requests to '/cards/:id/withdraw'", () => {
+      expect(mocks.protectedRoutes.post).nthCalledWith(3, '/cards/:id/withdraw', 'card.withdraw');
     });
   });
 

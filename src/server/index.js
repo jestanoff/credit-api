@@ -11,9 +11,10 @@ import config from './configuration/config.js';
 import * as card from './routes/card.js';
 import homepage from './routes/homepage.js';
 
-const server = (app = express()) => {
+const server = () => {
+  const app = express();
   const dbUri = process.env.db || 'mongodb://localhost:27017/carwash';
-  const port = Number(process.env.port) || 3000;
+  const port = Number(process.env.port) || 443;
 
   app.set('Secret', config.secret); // Sets authentication secret
 
@@ -29,11 +30,8 @@ const server = (app = express()) => {
 
   // Middlewares
   app.use(helmet()); // Helps secure the app by setting various http headers
-
   app.use(morgan('dev')); // Use morgan to log requests to the console
-
   app.use(express.urlencoded({ extended: true })); // Parse application/x-www-form-urlencoded
-
   app.use(express.json()); // Process res body as JSON
 
   // Routes
