@@ -1,5 +1,5 @@
 # TODO LIST
-* Fix withdraw and deposit
+* ~~Fix withdraw and deposit~~
 * Dockerize server and client apps
 * Integrate ACME to auto generate Let's encrypt certificates (server only) https://blog.usejournal.com/setting-up-a-ufw-secured-nginx-reverse-proxy-with-http-authentication-and-tls-certificates-from-b1103d67779f
 * Add Unit tests (Mocha, Chai and SuperTest or Jest - https://codehandbook.org/unit-test-express-route/ and https://codewithhugo.com/testing-an-express-app-with-supertest-moxios-and-jest/)
