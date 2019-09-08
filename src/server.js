@@ -19,8 +19,8 @@ app.set('Secret', config.secret); // Sets authentication secret
 mongoose.connect('mongodb://localhost:27017/carwash', {
   password: config.dbPassword,
   useCreateIndex: true,
+  useFindAndModify: false,
   useNewUrlParser: true,
-  username: config.dbUsername,
 });
 mongoose.connection.on('error', console.error);
 mongoose.connection.once('open', () => console.log('connected to MongoDB'));
