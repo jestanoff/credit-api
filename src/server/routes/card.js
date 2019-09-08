@@ -2,17 +2,15 @@ import {
   amendBalance, createCard, getCard, getCards,
 } from '../models/card.js';
 
-export const list = (req, res) => {
-  getCards()
-    .then(cards => {
-      res.status(200).json(cards);
-    })
-    .catch(console.error);
-};
+export const list = (req, res) => getCards()
+  .then(cards => {
+    res.status(200).json(cards);
+  })
+  .catch(console.error);
 
 export const create = (req, res) => {
   if (req.params.id) {
-    createCard(req.params.id)
+    return createCard(req.params.id)
       .then(card => {
         res.status(201).json(card);
       })
@@ -25,9 +23,8 @@ export const create = (req, res) => {
           throw err;
         }
       });
-  } else {
-    res.status(400).end();
   }
+  return res.status(400).end();
 };
 
 export const show = (req, res) => {
