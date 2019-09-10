@@ -10,7 +10,7 @@ jest.mock('../models/card.js', () => ({
   getCards: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
 }));
 
-describe.only('card routes', () => {
+describe('card routes', () => {
   const mocks = { req: {}, res: {} };
 
   beforeEach(() => {
@@ -116,15 +116,13 @@ describe.only('card routes', () => {
       expect(mocks.json).toHaveBeenCalledWith({ code: 'CARD_ALREADY_EXISTS', message: 'Attention!' });
     });
 
-    test('should rethrow any other error', async () => {
-      expect.assertions(1);
+    test('should log any other error', async () => {
+      expect.assertions(2);
       createCard.mockRejectedValue(new Error('any other error'));
 
-      try {
-        await card.create(mocks.req, mocks.res);
-      } catch (error) {
-        expect(error).toStrictEqual(new Error('any other error'));
-      }
+      await card.create(mocks.req, mocks.res);
+      expect(mocks.error).toHaveBeenCalledTimes(1);
+      expect(mocks.error).toHaveBeenCalledWith(new Error('any other error'));
     });
 
     test('should return status 400 BAD REQUEST if no id is in the request', async () => {
@@ -245,7 +243,7 @@ describe.only('card routes', () => {
       mocks.req.body = { amount: 50 };
     });
 
-    test('should query the db to amend card balance', async () => {
+    test('should query the db to deposit amount to the card balance', async () => {
       expect.assertions(2);
       await card.deposit(mocks.req, mocks.res);
 
@@ -267,6 +265,106 @@ describe.only('card routes', () => {
 
       expect(mocks.json).toHaveBeenCalledTimes(1);
       expect(mocks.json).toHaveBeenCalledWith({ balance: 70 });
+    });
+
+    test('should log any errors on the console', async () => {
+      expect.assertions(2);
+      jest.clearAllMocks();
+      amendBalance.mockRejectedValue(new Error('any error'));
+      await card.deposit(mocks.req, mocks.res);
+
+      expect(mocks.error).toHaveBeenCalledTimes(1);
+      expect(mocks.error).toHaveBeenCalledWith(new Error('any error'));
+    });
+
+    test('should return status 400 BAD REQUEST if no id is in the request', async () => {
+      expect.assertions(3);
+      mocks.req.params.id = undefined;
+      await card.deposit(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(400);
+      expect(mocks.end).toHaveBeenCalledTimes(1);
+    });
+
+    test('should return status 400 BAD REQUEST if no amount is in the request', async () => {
+      expect.assertions(3);
+      mocks.req.body.amount = undefined;
+      await card.deposit(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(400);
+      expect(mocks.end).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('card.withdraw', () => {
+    beforeEach(() => {
+      amendBalance.mockResolvedValue({ balance: 70 });
+      mocks.req.params = { id: 6 };
+      mocks.req.body = { amount: 50 };
+    });
+
+    test('should query the db to withdraw amount from the card balance', async () => {
+      expect.assertions(2);
+      await card.withdraw(mocks.req, mocks.res);
+
+      expect(amendBalance).toHaveBeenCalledTimes(1);
+      expect(amendBalance).toHaveBeenCalledWith(6, -50);
+    });
+
+    test('should return status 200 OK on success', async () => {
+      expect.assertions(2);
+      await card.withdraw(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(200);
+    });
+
+    test('should return the balance as json on success', async () => {
+      expect.assertions(2);
+      await card.withdraw(mocks.req, mocks.res);
+
+      expect(mocks.json).toHaveBeenCalledTimes(1);
+      expect(mocks.json).toHaveBeenCalledWith({ balance: 70 });
+    });
+
+    test('should return status 409 CONFLICT if there is not enough balance on that card', async () => {
+      amendBalance.mockResolvedValue(undefined);
+      await card.withdraw(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(409);
+    });
+
+    test('should return json with code of INSUFFICIENT_BALANCE and error message', async () => {
+      amendBalance.mockResolvedValue(undefined);
+      await card.withdraw(mocks.req, mocks.res);
+
+      expect(mocks.json).toHaveBeenCalledTimes(1);
+      expect(mocks.json).toHaveBeenCalledWith({
+        code: 'INSUFFICIENT_BALANCE',
+        message: 'Not enough credits on the card',
+      });
+    });
+
+    test('should log an error when amendBalance throws', async () => {
+      expect.assertions(2);
+      amendBalance.mockRejectedValue(Error('help'));
+      await card.withdraw(mocks.req, mocks.res);
+
+      expect(mocks.error).toHaveBeenCalledTimes(1);
+      expect(mocks.error).toHaveBeenCalledWith(Error('help'));
+    });
+
+    test('should return status 400 BAD REQUEST if no amount is in the request', async () => {
+      expect.assertions(3);
+      mocks.req.body.amount = undefined;
+      await card.withdraw(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(400);
+      expect(mocks.end).toHaveBeenCalledTimes(1);
     });
   });
 });
