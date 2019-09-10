@@ -13,8 +13,8 @@ import homepage from './routes/homepage.js';
 
 const server = () => {
   const app = express();
-  const dbUri = process.env.db || 'mongodb://localhost:27017/carwash';
-  const port = Number(process.env.port) || 443;
+  const dbUri = process.env.DB || 'mongodb://localhost:27017/carwash';
+  const port = Number(process.env.PORT) || 443;
 
   app.set('Secret', config.secret); // Sets authentication secret
 

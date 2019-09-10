@@ -55,7 +55,7 @@ describe('Server entry point', () => {
 
   beforeEach(() => {
     fs.readFileSync.mockReturnValueOnce('key').mockReturnValueOnce('cert');
-    process.env = { db: 'mongodb uri', port: '8000' };
+    process.env = { DB: 'mongodb uri', PORT: '8000' };
     https.createServer.mockImplementation(() => ({ listen: mocks.listen }));
     express.mockReturnValue(mocks.app);
     express.Router.mockReturnValue(mocks.protectedRoutes);
@@ -114,7 +114,7 @@ describe('Server entry point', () => {
     });
 
     test('should listen to port 443 if no process.env.port is passed', () => {
-      process.env.port = undefined;
+      process.env.PORT = undefined;
       jest.clearAllMocks();
       server();
 

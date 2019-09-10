@@ -16,12 +16,11 @@ export const create = (req, res) => {
       })
       .catch(err => {
         if (err.name === 'ValidationError') {
-          res
+          return res
             .status(409)
             .json({ code: 'CARD_ALREADY_EXISTS', message: err.errors.cardId.message });
-        } else {
-          throw err;
         }
+        throw err;
       });
   }
   return res.status(400).end();
@@ -29,36 +28,33 @@ export const create = (req, res) => {
 
 export const show = (req, res) => {
   if (req.params.id) {
-    getCard(req.params.id)
-      .then(card => {
-        res.status(200).json(card);
-      })
+    return getCard(req.params.id)
+      .then(card => res.status(200).json(card))
       .catch(console.error);
-  } else {
-    res.status(400).end();
   }
+  return res.status(400).end();
 };
 
 export const balance = (req, res) => {
   if (req.params.id) {
-    getCard(req.params.id)
-      .then(card => {
-        res.status(200).json({ balance: card.balance });
-      })
+    return getCard(req.params.id)
+      .then(card => res.status(200).json({ balance: card.balance }))
       .catch(console.error);
-  } else {
-    res.status(400).end();
   }
+  return res.status(400).end();
 };
 
 export const deposit = async (req, res) => {
-  amendBalance(req.params.id, req.body.amount).then(card => {
-    res.status(200).json({ balance: card.balance });
-  }).catch(() => {
-    res
-      .status(409)
-      .json({ code: 'DEPOSIT_ERROR', message: 'Card with this cardId already exists' });
-  });
+  if (req.params.id) {
+    return amendBalance(req.params.id, req.body.amount)
+      .then(card => res.status(200).json({ balance: card.balance }))
+      .catch(() => {
+        res
+          .status(409)
+          .json({ code: 'DEPOSIT_ERROR', message: 'Card with this cardId already exists' });
+      });
+  }
+  return res.status(400).end();
 };
 
 export const withdraw = async (req, res) => {
