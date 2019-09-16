@@ -5,7 +5,7 @@ import * as card from './card.js';
 
 const mockLimit = jest.fn();
 jest.mock('mongoose', () => ({
-  Schema: jest.fn().mockImplementation(function (definition, options) {
+  Schema: jest.fn().mockImplementation(function impl(definition, options) {
     return {
       definition,
       path: jest.fn().mockReturnValue('Hello'),
