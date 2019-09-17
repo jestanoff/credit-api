@@ -1,0 +1,235 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Card model should create a Card schema 1`] = `
+Array [
+  Object {
+    "balance": Object {
+      "default": 0,
+      "max": 1000,
+      "min": 0,
+      "type": [Function],
+    },
+    "cardId": [Function],
+    "transactions": Object {
+      "type": Array [
+        Object {
+          "definition": Object {
+            "amount": Object {
+              "max": 1000,
+              "min": 1,
+              "required": true,
+              "type": [Function],
+            },
+            "type": Object {
+              "enum": Array [
+                "deposit",
+                "withdraw",
+              ],
+              "required": true,
+              "type": [Function],
+            },
+          },
+          "options": Object {
+            "autoIndex": false,
+            "strict": true,
+            "timestamps": true,
+          },
+          "path": [MockFunction] {
+            "calls": Array [
+              Array [
+                "cardId",
+                Object {
+                  "required": true,
+                  "type": [Function],
+                  "unique": true,
+                  "validate": Object {
+                    "validator": [Function],
+                  },
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+  Object {
+    "autoIndex": false,
+    "strict": true,
+    "timestamps": true,
+  },
+]
+`;
+
+exports[`Card model should create a new car document with Card schema 1`] = `
+Array [
+  "Card",
+  Object {
+    "definition": Object {
+      "balance": Object {
+        "default": 0,
+        "max": 1000,
+        "min": 0,
+        "type": [Function],
+      },
+      "cardId": [Function],
+      "transactions": Object {
+        "type": Array [
+          Object {
+            "definition": Object {
+              "amount": Object {
+                "max": 1000,
+                "min": 1,
+                "required": true,
+                "type": [Function],
+              },
+              "type": Object {
+                "enum": Array [
+                  "deposit",
+                  "withdraw",
+                ],
+                "required": true,
+                "type": [Function],
+              },
+            },
+            "options": Object {
+              "autoIndex": false,
+              "strict": true,
+              "timestamps": true,
+            },
+            "path": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "cardId",
+                  Object {
+                    "required": true,
+                    "type": [Function],
+                    "unique": true,
+                    "validate": Object {
+                      "validator": [Function],
+                    },
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "options": Object {
+      "autoIndex": false,
+      "strict": true,
+      "timestamps": true,
+    },
+    "path": [MockFunction] {
+      "calls": Array [
+        Array [
+          "cardId",
+          Object {
+            "required": true,
+            "type": [Function],
+            "unique": true,
+            "validate": Object {
+              "validator": [Function],
+            },
+          },
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    },
+  },
+]
+`;
+
+exports[`Transaction model should create a Transaction schema 1`] = `
+Array [
+  Object {
+    "amount": Object {
+      "max": 1000,
+      "min": 1,
+      "required": true,
+      "type": [Function],
+    },
+    "type": Object {
+      "enum": Array [
+        "deposit",
+        "withdraw",
+      ],
+      "required": true,
+      "type": [Function],
+    },
+  },
+  Object {
+    "autoIndex": false,
+    "strict": true,
+    "timestamps": true,
+  },
+]
+`;
+
+exports[`Transaction model should create a new transaction document with Transaction schema 1`] = `
+Array [
+  "Transaction",
+  Object {
+    "definition": Object {
+      "amount": Object {
+        "max": 1000,
+        "min": 1,
+        "required": true,
+        "type": [Function],
+      },
+      "type": Object {
+        "enum": Array [
+          "deposit",
+          "withdraw",
+        ],
+        "required": true,
+        "type": [Function],
+      },
+    },
+    "options": Object {
+      "autoIndex": false,
+      "strict": true,
+      "timestamps": true,
+    },
+    "path": [MockFunction] {
+      "calls": Array [
+        Array [
+          "cardId",
+          Object {
+            "required": true,
+            "type": [Function],
+            "unique": true,
+            "validate": Object {
+              "validator": [Function],
+            },
+          },
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    },
+  },
+]
+`;
