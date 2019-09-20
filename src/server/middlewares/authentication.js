@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 export default (req, res) => {
+// TODO:
 // * Block consecutive failed attempts by the same user name and IP address.
 // * Block number of failed attempts from an IP address over some long period of time.
 //   For example, block an IP address if it makes 100 failed attempts in one day.
