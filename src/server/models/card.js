@@ -65,6 +65,9 @@ export const createCard = cardId => new Card({ cardId }).save();
 export const getCard = cardId => Card.findOne({ cardId });
 
 export const amendBalance = async (cardId, amount) => {
+  if (!cardId || typeof cardId !== 'string' || cardId.length <= 5) return undefined;
+  if (!amount || typeof amount !== 'number') return undefined;
+
   const card = await Card.findOne({ cardId });
   const balance = card.balance + amount;
 

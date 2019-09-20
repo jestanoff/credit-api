@@ -1,5 +1,4 @@
 import mongoose, { mocks } from 'mongoose';
-// eslint-disable-next-line no-unused-vars
 import * as card from './card.js';
 
 jest.mock('mongoose');
@@ -72,7 +71,7 @@ describe('db queries', () => {
     mocks.findOne.mockReturnValue({
       balance: 20,
       cardId: 'singleCard',
-      transactions: ['1', '2'],
+      transactions: [],
     });
   });
 
@@ -94,8 +93,10 @@ describe('db queries', () => {
 
   describe('createCard', () => {
     test('should crate a new card with a given cardId and then save it', () => {
-      // TODO
-      // card.createCard('newCard');
+      card.createCard('newCard');
+
+      expect(mocks.instance).toBeCalledTimes(1);
+      expect(mocks.instance).toBeCalledWith({ cardId: 'newCard' });
     });
   });
 
@@ -104,7 +105,7 @@ describe('db queries', () => {
       expect(card.getCard('getMeThatCard')).toMatchObject({
         balance: 20,
         cardId: 'singleCard',
-        transactions: ['1', '2'],
+        transactions: [],
       });
       expect(mocks.findOne).toBeCalledTimes(1);
       expect(mocks.findOne).toBeCalledWith({ cardId: 'getMeThatCard' });
@@ -112,12 +113,87 @@ describe('db queries', () => {
   });
 
   describe('amendBalance', () => {
-    test('should only amend the balance of a single card with a given cardId', async () => {
-      // TODO
-      // await card.amendBalance('getMeThisCard', 10);
+    test('should return undefined if cardId is correct type or not there', async () => {
+      let result;
+      expect.assertions(3);
 
-      // expect(mocks.findOne).toBeCalledTimes(1);
-      // expect(mocks.findOne).toBeCalledWith({ cardId: 'getMeThisCard' });
+      result = await card.amendBalance(undefined, 5);
+      expect(result).toBe(undefined);
+
+      result = await card.amendBalance(20, 5);
+      expect(result).toBe(undefined);
+
+      result = await card.amendBalance('123', 5);
+      expect(result).toBe(undefined);
+    });
+
+    test('should only amend the balance of a single card with a given cardId', async () => {
+      expect.assertions(2);
+      await card.amendBalance('getMeThisCard', 10);
+
+      expect(mocks.findOne).toBeCalledTimes(1);
+      expect(mocks.findOne).toBeCalledWith({ cardId: 'getMeThisCard' });
+    });
+
+    test('should return undefined if the new balance is less than 0', async () => {
+      expect.assertions(1);
+      const result = await card.amendBalance('anyCard', -25);
+
+      expect(result).toBe(undefined);
+    });
+
+    test('should return undefined if the new balance is less than 0 decreased by 1', async () => {
+      expect.assertions(1);
+      mocks.findOne.mockReturnValue({ balance: 0 });
+      const result = await card.amendBalance('anyCard', -1);
+
+      expect(result).toBe(undefined);
+    });
+
+    test('should return the new card with increased balance and a deposit transaction', async () => {
+      expect.assertions(1);
+      mocks.instance.mockImplementation(({ amount, type }) => ({ amount, type }));
+      const result = await card.amendBalance('getMeThisCard', 80);
+
+      expect(result).toStrictEqual({
+        balance: 100,
+        cardId: 'getMeThisCard',
+        transactions: [{ amount: 80, type: 'deposit' }],
+      });
+    });
+
+    test('should return the new card with increased balance by 1 and a "deposit" transaction', async () => {
+      expect.assertions(1);
+      mocks.instance.mockImplementation(({ amount, type }) => ({ amount, type }));
+      const result = await card.amendBalance('getMeThisCard', 1);
+
+      expect(result).toStrictEqual({
+        balance: 21,
+        cardId: 'getMeThisCard',
+        transactions: [{ amount: 1, type: 'deposit' }],
+      });
+    });
+
+    test('should return the new card with decreased balance and a "withdraw" transaction', async () => {
+      expect.assertions(1);
+      const result = await card.amendBalance('decreasedCard', -18);
+
+      expect(result).toStrictEqual({
+        balance: 2,
+        cardId: 'decreasedCard',
+        transactions: [{ amount: 18, type: 'withdraw' }],
+      });
+    });
+
+    test('should return the new card with decreased balance by 1 and a "withdraw" transaction', async () => {
+      expect.assertions(1);
+      const result = await card.amendBalance('decreasedCard', -1);
+
+      expect(result).toStrictEqual({
+        balance: 19,
+        cardId: 'decreasedCard',
+        transactions: [{ amount: 1, type: 'withdraw' }],
+      });
     });
   });
 });
