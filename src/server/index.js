@@ -26,7 +26,7 @@ const server = () => {
     useNewUrlParser: true,
   });
   mongoose.connection.on('error', console.error);
-  mongoose.connection.once('open', () => console.log('connected to MongoDB'));
+  mongoose.connection.once('open', () => console.log('Connected to MongoDB'));
 
   // Middlewares
   app.use(helmet()); // Helps secure the app by setting various http headers

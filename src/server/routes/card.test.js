@@ -10,7 +10,7 @@ jest.mock('../models/card.js', () => ({
   getCards: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
 }));
 
-describe('card routes', () => {
+describe('Card routes', () => {
   const mocks = { req: {}, res: {} };
 
   beforeEach(() => {

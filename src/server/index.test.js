@@ -59,11 +59,15 @@ describe('Server entry point', () => {
     https.createServer.mockImplementation(() => ({ listen: mocks.listen }));
     express.mockReturnValue(mocks.app);
     express.Router.mockReturnValue(mocks.protectedRoutes);
+    console.log = jest.fn();
 
     server();
   });
 
-  afterEach(jest.clearAllMocks);
+  afterEach(() => {
+    jest.clearAllMocks();
+    console.log.mockRestore();
+  });
 
   describe('Express app', () => {
     test('should setup initialize application', () => {
@@ -119,6 +123,16 @@ describe('Server entry point', () => {
       server();
 
       expect(mocks.listen).toHaveBeenCalledWith(443, expect.any(Function));
+    });
+
+    test('should log the app URI once the https server is up', () => {
+      jest.clearAllMocks();
+      server();
+      const callback = mocks.listen.mock.calls[0][1];
+      callback();
+
+      expect(console.log).toHaveBeenCalledTimes(1);
+      expect(console.log).toHaveBeenCalledWith('App listening on https://localhost:8000/');
     });
   });
 
@@ -184,14 +198,28 @@ describe('Server entry point', () => {
       });
     });
 
+    test('should connect to the database with the default DB URI ', () => {
+      process.env.DB = undefined;
+      jest.clearAllMocks();
+      server();
+
+      expect(mongoose.connect).toHaveBeenCalledTimes(1);
+      expect(mongoose.connect).toHaveBeenCalledWith('mongodb://localhost:27017/carwash', expect.any(Object));
+    });
+
     test('should log an error on db fail', () => {
       expect(mongoose.connection.on).toHaveBeenCalledTimes(1);
       expect(mongoose.connection.on).toHaveBeenCalledWith('error', console.error);
     });
 
     test('should log a successful message', () => {
+      const callback = mongoose.connection.once.mock.calls[0][1];
+      callback();
+
       expect(mongoose.connection.once).toHaveBeenCalledTimes(1);
       expect(mongoose.connection.once).toHaveBeenCalledWith('open', expect.any(Function));
+      expect(console.log).toHaveBeenCalledTimes(1);
+      expect(console.log).toHaveBeenCalledWith('Connected to MongoDB');
     });
   });
 });

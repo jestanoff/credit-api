@@ -113,7 +113,7 @@ describe('db queries', () => {
   });
 
   describe('amendBalance', () => {
-    test('should return undefined if cardId is correct type or not there', async () => {
+    test('should return undefined if cardId is incorrect type or not there', async () => {
       let result;
       expect.assertions(3);
 
@@ -124,6 +124,20 @@ describe('db queries', () => {
       expect(result).toBe(undefined);
 
       result = await card.amendBalance('123', 5);
+      expect(result).toBe(undefined);
+    });
+
+    test('should return undefined if balance is incorrect type or not there', async () => {
+      let result;
+      expect.assertions(3);
+
+      result = await card.amendBalance('cardId', 0);
+      expect(result).toBe(undefined);
+
+      result = await card.amendBalance('cardId', '5');
+      expect(result).toBe(undefined);
+
+      result = await card.amendBalance('cardId');
       expect(result).toBe(undefined);
     });
 
