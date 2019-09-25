@@ -15,6 +15,10 @@ export default () => {
     if (err) console.log('Error on write: ', err.message);
   });
 
+  setTimeout(() => {
+    port.write(Buffer.from(`AB5601017BAF1F68${'010E'}D9C0`, 'hex'));
+  }, 0);
+
   // Switches the port into "flowing mode"
   port.on('data', data => {
     console.log('Data:', data);
