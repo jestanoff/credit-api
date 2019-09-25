@@ -10,7 +10,8 @@
   "engineStrict": true,
   "scripts": {
     "lint": "eslint src/",
-    "start": "nodemon --experimental-modules src/server.js",
+    "server": "nodemon --experimental-modules src/server.js",
+    "client": "nodemon --experimental-modules src/client.js",
     "test": "jest --config=jest.config.js",
     "watch": "jest --config=jest.config.js --watchAll"
   },
@@ -30,11 +31,13 @@
     "joi": "^14.0.6",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.6.11",
-    "morgan": "^1.9.1"
+    "morgan": "^1.9.1",
+    "serialport": "^7.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.6.0",
     "@babel/preset-env": "^7.6.0",
+    "@serialport/binding-mock": "^2.0.5",
     "babel-jest": "^24.9.0",
     "eslint": "^6.2.1",
     "eslint-config-airbnb-base": "^14.0.0",
