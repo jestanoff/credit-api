@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import https from 'https';
 import fs from 'fs';
 import helmet from 'helmet';
-import server from './index.js';
+import server from './server.js';
 
 jest.mock('express', () => {
   const exp = jest.fn();

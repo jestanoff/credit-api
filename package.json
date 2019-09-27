@@ -2,7 +2,7 @@
   "name": "carwash-api",
   "version": "1.0.0",
   "description": "### **POST /api/cards**",
-  "main": "src/server.js",
+  "main": "src/server/index.js",
   "type": "module",
   "engines": {
     "node": ">=v12.0.0"
@@ -10,8 +10,8 @@
   "engineStrict": true,
   "scripts": {
     "lint": "eslint src/",
-    "server": "nodemon --experimental-modules src/server.js",
-    "client": "nodemon --experimental-modules src/client.js",
+    "server": "nodemon --watch src/server --experimental-modules src/server/index.js",
+    "client": "nodemon --watch src/client --experimental-modules src/client/index.js",
     "test": "jest --config=jest.config.js",
     "watch": "jest --config=jest.config.js --watchAll"
   },
