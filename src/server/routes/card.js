@@ -35,7 +35,17 @@ export const show = (req, res) => {
 export const balance = (req, res) => {
   if (req.params.id) {
     return getCard(req.params.id)
-      .then(card => res.status(200).json({ balance: card.balance }))
+      .then(card => {
+        if (!card) {
+          return res
+            .status(409)
+            .json({
+              code: 'CARD_NOT_FOUND',
+              message: `Card with id of ${req.params.id} doesn't exist`,
+            });
+        }
+        return res.status(200).json({ balance: card.balance });
+      })
       .catch(console.error);
   }
   return res.status(400).end();

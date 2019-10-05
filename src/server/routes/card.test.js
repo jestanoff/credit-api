@@ -235,6 +235,21 @@ describe('Card routes', () => {
       expect(mocks.res.status).toHaveBeenCalledWith(400);
       expect(mocks.end).toHaveBeenCalledTimes(1);
     });
+
+    test('should return status 409 CONFLICT if no card with such id has been found', async () => {
+      expect.assertions(4);
+      mocks.req.params.id = '123';
+      getCard.mockResolvedValue(null);
+      await card.balance(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(409);
+      expect(mocks.json).toBeCalledTimes(1);
+      expect(mocks.json).toBeCalledWith({
+        code: 'CARD_NOT_FOUND',
+        message: "Card with id of 123 doesn't exist",
+      });
+    });
   });
 
   describe('card.deposit', () => {

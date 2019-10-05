@@ -54,7 +54,7 @@ describe('Server entry point', () => {
   };
 
   beforeEach(() => {
-    fs.readFileSync.mockReturnValueOnce('key').mockReturnValueOnce('cert');
+    fs.readFileSync.mockReturnValueOnce('cert').mockReturnValueOnce('key');
     process.env = { DB: 'mongodb uri', PORT: '8000' };
     https.createServer.mockImplementation(() => ({ listen: mocks.listen }));
     express.mockReturnValue(mocks.app);

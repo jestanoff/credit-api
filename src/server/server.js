@@ -51,8 +51,8 @@ const server = () => {
 
   https.createServer({
     // Generate valid certs from https://letsencrypt.org/
-    key: fs.readFileSync('server.key'),
     cert: fs.readFileSync('server.cert'),
+    key: fs.readFileSync('server.key'),
   }, app).listen(port, () => console.log(`App listening on https://localhost:${port}/`));
 };
 
