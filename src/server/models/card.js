@@ -71,7 +71,7 @@ export const amendBalance = async (cardId, amount) => {
     throw err;
   }
 
-  if (!amount) {
+  if (!amount || Number(amount) === 0) {
     const err = new Error('amount is required');
     err.code = 'AMOUNT_REQUIRED';
     throw err;
