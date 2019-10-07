@@ -113,32 +113,30 @@ describe('db queries', () => {
   });
 
   describe('amendBalance', () => {
-    test('should return undefined if cardId is incorrect type or not there', async () => {
-      let result;
-      expect.assertions(3);
+    test('should throw if cardId is not passed', async () => {
+      expect.assertions(1);
 
-      result = await card.amendBalance(undefined, 5);
-      expect(result).toBe(undefined);
-
-      result = await card.amendBalance(20, 5);
-      expect(result).toBe(undefined);
-
-      result = await card.amendBalance('123', 5);
-      expect(result).toBe(undefined);
+      try {
+        await card.amendBalance(undefined, 5);
+      } catch (err) {
+        expect(err.code).toBe('CARD_ID_REQUIRED');
+      }
     });
 
-    test('should return undefined if balance is incorrect type or not there', async () => {
-      let result;
-      expect.assertions(3);
+    test('should throw if balance is not there or 0', async () => {
+      expect.assertions(2);
 
-      result = await card.amendBalance('cardId', 0);
-      expect(result).toBe(undefined);
+      try {
+        await card.amendBalance('cardId', 0);
+      } catch (err) {
+        expect(err.code).toBe('AMOUNT_REQUIRED');
+      }
 
-      result = await card.amendBalance('cardId', '5');
-      expect(result).toBe(undefined);
-
-      result = await card.amendBalance('cardId');
-      expect(result).toBe(undefined);
+      try {
+        await card.amendBalance('cardId');
+      } catch (err) {
+        expect(err.code).toBe('AMOUNT_REQUIRED');
+      }
     });
 
     test('should only amend the balance of a single card with a given cardId', async () => {
@@ -149,19 +147,39 @@ describe('db queries', () => {
       expect(mocks.findOne).toBeCalledWith({ cardId: 'getMeThisCard' });
     });
 
-    test('should return undefined if the new balance is less than 0', async () => {
-      expect.assertions(1);
-      const result = await card.amendBalance('anyCard', -25);
+    test('should throw if the new balance is less than 0', async () => {
+      expect.assertions(2);
 
-      expect(result).toBe(undefined);
+      try {
+        await card.amendBalance('anyCard', -25);
+      } catch (err) {
+        expect(err.code).toBe('NOT_ENOUGH_CREDITS');
+        expect(err.message).toBe('Not enough credits');
+      }
     });
 
-    test('should return undefined if the new balance is less than 0 decreased by 1', async () => {
-      expect.assertions(1);
+    test('should throw if the new balance is less than 0 decreased by 1', async () => {
+      expect.assertions(2);
       mocks.findOne.mockReturnValue({ balance: 0 });
-      const result = await card.amendBalance('anyCard', -1);
 
-      expect(result).toBe(undefined);
+      try {
+        await card.amendBalance('anyCard', -1);
+      } catch (err) {
+        expect(err.code).toBe('NOT_ENOUGH_CREDITS');
+        expect(err.message).toBe('Not enough credits');
+      }
+    });
+
+    test('should throw if there is no card found', async () => {
+      expect.assertions(2);
+      mocks.findOne.mockReturnValue(null);
+
+      try {
+        await card.amendBalance('unknownCard', 10);
+      } catch (err) {
+        expect(err.code).toBe('CARD_NOT_FOUND');
+        expect(err.message).toBe('Card not found');
+      }
     });
 
     test('should return the new card with increased balance and a deposit transaction', async () => {

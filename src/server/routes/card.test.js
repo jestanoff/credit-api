@@ -31,7 +31,11 @@ describe('Card routes', () => {
   describe('card.list', () => {
     beforeEach(() => {
       mocks.json = jest.fn();
-      mocks.res.status = jest.fn().mockReturnValue({ json: mocks.json });
+      mocks.end = jest.fn();
+      mocks.res.status = jest.fn().mockReturnValue({
+        json: mocks.json,
+        end: mocks.end,
+      });
 
       card.list(mocks.req, mocks.res);
     });
@@ -60,6 +64,17 @@ describe('Card routes', () => {
 
       expect(mocks.error).toHaveBeenCalledTimes(1);
       expect(mocks.error).toHaveBeenCalledWith(new Error('any error'));
+    });
+
+    test('should return 500 for unhandled errors', async () => {
+      expect.assertions(3);
+      jest.clearAllMocks();
+      getCards.mockRejectedValue(new Error('any error'));
+      await card.list(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(500);
+      expect(mocks.end).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -165,6 +180,20 @@ describe('Card routes', () => {
       expect(mocks.json).toHaveBeenCalledWith({ id: 3 });
     });
 
+    test('should return CONFLICT 409 with json code of CARD_NOT_FOUND and error message', async () => {
+      expect.assertions(4);
+      getCard.mockResolvedValue(null);
+      await card.show(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(409);
+      expect(mocks.json).toHaveBeenCalledTimes(1);
+      expect(mocks.json).toHaveBeenCalledWith({
+        code: 'CARD_NOT_FOUND',
+        message: "Card with this id doesn't exist",
+      });
+    });
+
     test('should log any errors on the console', async () => {
       expect.assertions(2);
       jest.clearAllMocks();
@@ -173,6 +202,16 @@ describe('Card routes', () => {
 
       expect(mocks.error).toHaveBeenCalledTimes(1);
       expect(mocks.error).toHaveBeenCalledWith(new Error('any error'));
+    });
+
+    test('should return status 500 on error', async () => {
+      expect.assertions(2);
+      jest.clearAllMocks();
+      getCard.mockRejectedValue(new Error('Programmer error'));
+      await card.show(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(500);
     });
 
     test('should return status 400 BAD REQUEST if no id is in the request', async () => {
@@ -247,7 +286,7 @@ describe('Card routes', () => {
       expect(mocks.json).toBeCalledTimes(1);
       expect(mocks.json).toBeCalledWith({
         code: 'CARD_NOT_FOUND',
-        message: "Card with id of 123 doesn't exist",
+        message: "Card with this id doesn't exist",
       });
     });
   });
@@ -280,6 +319,21 @@ describe('Card routes', () => {
 
       expect(mocks.json).toHaveBeenCalledTimes(1);
       expect(mocks.json).toHaveBeenCalledWith({ balance: 70 });
+    });
+
+    test('should return status 409 CONFLICT and CARD_NOT_FOUND code if the card id is not in the db', async () => {
+      const err = new Error('No card');
+      err.code = 'CARD_NOT_FOUND';
+      amendBalance.mockRejectedValue(err);
+      await card.deposit(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(409);
+      expect(mocks.json).toHaveBeenCalledTimes(1);
+      expect(mocks.json).toHaveBeenCalledWith({
+        code: 'CARD_NOT_FOUND',
+        message: "Card with this id doesn't exist",
+      });
     });
 
     test('should log any errors on the console', async () => {
@@ -345,7 +399,12 @@ describe('Card routes', () => {
     });
 
     test('should return status 409 CONFLICT if there is not enough balance on that card', async () => {
-      amendBalance.mockResolvedValue(undefined);
+      expect.assertions(2);
+      amendBalance.mockImplementation(() => {
+        const err = new Error('no credits');
+        err.code = 'NOT_ENOUGH_CREDITS';
+        throw err;
+      });
       await card.withdraw(mocks.req, mocks.res);
 
       expect(mocks.res.status).toHaveBeenCalledTimes(1);
@@ -353,13 +412,36 @@ describe('Card routes', () => {
     });
 
     test('should return json with code of INSUFFICIENT_BALANCE and error message', async () => {
-      amendBalance.mockResolvedValue(undefined);
+      expect.assertions(2);
+      amendBalance.mockImplementation(() => {
+        const err = new Error('no credits');
+        err.code = 'NOT_ENOUGH_CREDITS';
+        throw err;
+      });
       await card.withdraw(mocks.req, mocks.res);
 
       expect(mocks.json).toHaveBeenCalledTimes(1);
       expect(mocks.json).toHaveBeenCalledWith({
         code: 'INSUFFICIENT_BALANCE',
         message: 'Not enough credits on the card',
+      });
+    });
+
+    test('should return CONFLICT 409 with json code of CARD_NOT_FOUND and error message', async () => {
+      expect.assertions(4);
+      amendBalance.mockImplementation(() => {
+        const err = new Error('no card');
+        err.code = 'CARD_NOT_FOUND';
+        throw err;
+      });
+      await card.withdraw(mocks.req, mocks.res);
+
+      expect(mocks.res.status).toHaveBeenCalledTimes(1);
+      expect(mocks.res.status).toHaveBeenCalledWith(409);
+      expect(mocks.json).toHaveBeenCalledTimes(1);
+      expect(mocks.json).toHaveBeenCalledWith({
+        code: 'CARD_NOT_FOUND',
+        message: "Card with this id doesn't exist",
       });
     });
 

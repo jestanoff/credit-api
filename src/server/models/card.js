@@ -65,13 +65,33 @@ export const createCard = cardId => new Card({ cardId }).save();
 export const getCard = cardId => Card.findOne({ cardId });
 
 export const amendBalance = async (cardId, amount) => {
-  if (!cardId || typeof cardId !== 'string' || cardId.length <= 5) return undefined;
-  if (!amount || typeof amount !== 'number') return undefined;
+  if (!cardId) {
+    const err = new Error('cardId is required');
+    err.code = 'CARD_ID_REQUIRED';
+    throw err;
+  }
+
+  if (!amount) {
+    const err = new Error('amount is required');
+    err.code = 'AMOUNT_REQUIRED';
+    throw err;
+  }
 
   const card = await Card.findOne({ cardId });
-  const balance = card.balance + amount;
 
-  if (balance < 0) return undefined;
+  if (!card) {
+    const err = new Error('Card not found');
+    err.code = 'CARD_NOT_FOUND';
+    throw err;
+  }
+
+  const balance = card.balance + Number(amount);
+
+  if (balance < 0) {
+    const err = new Error('Not enough credits');
+    err.code = 'NOT_ENOUGH_CREDITS';
+    throw err;
+  }
 
   const transactions = [...card.transactions,
     new Transaction({
@@ -79,5 +99,6 @@ export const amendBalance = async (cardId, amount) => {
       type: Math.sign(amount) === -1 ? 'withdraw' : 'deposit',
     }),
   ];
+
   return Card.findOneAndUpdate({ cardId }, { balance, transactions }, { new: true });
 };
