@@ -80,22 +80,6 @@ export const amendBalance = async (cardId, amount) => {
     throw err;
   }
 
-  const card = await Card.findOne({ cardId });
-
-  if (!card) {
-    const err = new Error('Card not found');
-    err.code = 'CARD_NOT_FOUND';
-    throw err;
-  }
-
-  const balance = card.balance + Number(amount);
-
-  if (balance < 0) {
-    const err = new Error('Not enough credits');
-    err.code = 'NOT_ENOUGH_CREDITS';
-    throw err;
-  }
-
   const transaction = new Transaction({
     amount: Math.abs(amount),
     type: Math.sign(amount) === -1 ? 'withdraw' : 'deposit',
@@ -103,6 +87,10 @@ export const amendBalance = async (cardId, amount) => {
 
   return Card.findOneAndUpdate(
     { cardId },
-    { balance, $push: { transactions: transaction } }, { new: true },
+    {
+      $inc: { balance: amount },
+      $push: { transactions: transaction },
+    },
+    { runValidators: true, new: true },
   );
 };

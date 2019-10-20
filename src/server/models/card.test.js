@@ -139,61 +139,16 @@ describe('db queries', () => {
       }
     });
 
-    test('should only amend the balance of a single card with a given cardId', async () => {
-      expect.assertions(2);
-      await card.amendBalance('getMeThisCard', 10);
-
-      expect(mocks.findOne).toBeCalledTimes(1);
-      expect(mocks.findOne).toBeCalledWith({ cardId: 'getMeThisCard' });
-    });
-
-    test('should throw if the new balance is less than 0', async () => {
-      expect.assertions(2);
-
-      try {
-        await card.amendBalance('anyCard', -25);
-      } catch (err) {
-        expect(err.code).toBe('NOT_ENOUGH_CREDITS');
-        expect(err.message).toBe('Not enough credits');
-      }
-    });
-
-    test('should throw if the new balance is less than 0 decreased by 1', async () => {
-      expect.assertions(2);
-      mocks.findOne.mockReturnValue({ balance: 0 });
-
-      try {
-        await card.amendBalance('anyCard', -1);
-      } catch (err) {
-        expect(err.code).toBe('NOT_ENOUGH_CREDITS');
-        expect(err.message).toBe('Not enough credits');
-      }
-    });
-
-    test('should throw if there is no card found', async () => {
-      expect.assertions(2);
-      mocks.findOne.mockReturnValue(null);
-
-      try {
-        await card.amendBalance('unknownCard', 10);
-      } catch (err) {
-        expect(err.code).toBe('CARD_NOT_FOUND');
-        expect(err.message).toBe('Card not found');
-      }
-    });
-
     test('should return the new card with increased balance and a deposit transaction', async () => {
       expect.assertions(1);
       mocks.instance.mockImplementation(({ amount, type }) => ({ amount, type }));
       const result = await card.amendBalance('getMeThisCard', 80);
 
       expect(result).toStrictEqual({
-        balance: 100,
         cardId: 'getMeThisCard',
-        $push: {
-          transactions: { amount: 80, type: 'deposit' },
-        },
-        options: { new: true },
+        $inc: { balance: 80 },
+        $push: { transactions: { amount: 80, type: 'deposit' }},
+        options: { new: true, runValidators: true },
       });
     });
 
@@ -203,10 +158,10 @@ describe('db queries', () => {
       const result = await card.amendBalance('getMeThisCard', 1);
 
       expect(result).toStrictEqual({
-        balance: 21,
         cardId: 'getMeThisCard',
+        $inc: { balance: 1 },
         $push: { transactions: { amount: 1, type: 'deposit' } },
-        options: { new: true },
+        options: { new: true, runValidators: true },
       });
     });
 
@@ -215,10 +170,10 @@ describe('db queries', () => {
       const result = await card.amendBalance('decreasedCard', -18);
 
       expect(result).toStrictEqual({
-        balance: 2,
         cardId: 'decreasedCard',
+        $inc: { balance: -18 },
         $push: { transactions: { amount: 18, type: 'withdraw' } },
-        options: { new: true },
+        options: { new: true, runValidators: true },
       });
     });
 
@@ -227,10 +182,10 @@ describe('db queries', () => {
       const result = await card.amendBalance('decreasedCard', -1);
 
       expect(result).toStrictEqual({
-        balance: 19,
         cardId: 'decreasedCard',
+        $inc: { balance: -1 },
         $push: { transactions: { amount: 1, type: 'withdraw' } },
-        options: { new: true },
+        options: { new: true, runValidators: true },
       });
     });
   });

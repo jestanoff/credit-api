@@ -322,9 +322,7 @@ describe('Card routes', () => {
     });
 
     test('should return status 409 CONFLICT and CARD_NOT_FOUND code if the card id is not in the db', async () => {
-      const err = new Error('No card');
-      err.code = 'CARD_NOT_FOUND';
-      amendBalance.mockRejectedValue(err);
+      amendBalance.mockReturnValue(null);
       await card.deposit(mocks.req, mocks.res);
 
       expect(mocks.res.status).toHaveBeenCalledTimes(1);
@@ -376,6 +374,7 @@ describe('Card routes', () => {
 
     test('should query the db to withdraw amount from the card balance', async () => {
       expect.assertions(2);
+      getCard.mockReturnValue({ balance: 100 });
       await card.withdraw(mocks.req, mocks.res);
 
       expect(amendBalance).toHaveBeenCalledTimes(1);
@@ -400,11 +399,7 @@ describe('Card routes', () => {
 
     test('should return status 409 CONFLICT if there is not enough balance on that card', async () => {
       expect.assertions(2);
-      amendBalance.mockImplementation(() => {
-        const err = new Error('no credits');
-        err.code = 'NOT_ENOUGH_CREDITS';
-        throw err;
-      });
+      getCard.mockReturnValue({ balance: 0 });
       await card.withdraw(mocks.req, mocks.res);
 
       expect(mocks.res.status).toHaveBeenCalledTimes(1);
@@ -413,11 +408,7 @@ describe('Card routes', () => {
 
     test('should return json with code of INSUFFICIENT_BALANCE and error message', async () => {
       expect.assertions(2);
-      amendBalance.mockImplementation(() => {
-        const err = new Error('no credits');
-        err.code = 'NOT_ENOUGH_CREDITS';
-        throw err;
-      });
+      getCard.mockReturnValue({ balance: 0 });
       await card.withdraw(mocks.req, mocks.res);
 
       expect(mocks.json).toHaveBeenCalledTimes(1);
@@ -429,11 +420,7 @@ describe('Card routes', () => {
 
     test('should return CONFLICT 409 with json code of CARD_NOT_FOUND and error message', async () => {
       expect.assertions(4);
-      amendBalance.mockImplementation(() => {
-        const err = new Error('no card');
-        err.code = 'CARD_NOT_FOUND';
-        throw err;
-      });
+      getCard.mockReturnValue(null);
       await card.withdraw(mocks.req, mocks.res);
 
       expect(mocks.res.status).toHaveBeenCalledTimes(1);
@@ -447,6 +434,7 @@ describe('Card routes', () => {
 
     test('should log an error when amendBalance throws', async () => {
       expect.assertions(2);
+      getCard.mockReturnValue({ balance: 50 });
       amendBalance.mockRejectedValue(Error('help'));
       await card.withdraw(mocks.req, mocks.res);
 

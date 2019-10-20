@@ -15,11 +15,11 @@ export const list = (req, res) => getCards()
   });
 
 export const create = (req, res) => {
-  if (req.params.id) {
+  if (req && req.params && req.params.id) {
     return createCard(req.params.id)
       .then(card => res.status(201).json(card))
       .catch(err => {
-        if (err.name === 'ValidationError') {
+        if (err && err.errors && err.errors.cardId && err.name && err.name === 'ValidationError') {
           return res
             .status(409)
             .json({ code: 'CARD_ALREADY_EXISTS', message: err.errors.cardId.message });
@@ -32,7 +32,7 @@ export const create = (req, res) => {
 };
 
 export const show = (req, res) => {
-  if (req.params.id) {
+  if (req && req.params && req.params.id) {
     return getCard(req.params.id)
       .then(card => {
         if (!card) return res.status(409).json(CARD_NOT_FOUND);
@@ -47,10 +47,10 @@ export const show = (req, res) => {
 };
 
 export const balance = (req, res) => {
-  if (req.params.id) {
+  if (req && req.params && req.params.id) {
     return getCard(req.params.id)
       .then(card => {
-        if (!card) return res.status(409).json(CARD_NOT_FOUND);
+        if (card === null) return res.status(409).json(CARD_NOT_FOUND);
         return res.status(200).json({ balance: card.balance });
       })
       .catch(err => {
@@ -62,13 +62,14 @@ export const balance = (req, res) => {
 };
 
 export const deposit = async (req, res) => {
-  if (req.params.id && req.body.amount) {
+  if (req && req.params && req.params.id && req.body && req.body.amount) {
     try {
       const card = await amendBalance(req.params.id, req.body.amount);
+
+      if (card === null) return res.status(409).json(CARD_NOT_FOUND);
+
       return res.status(200).json({ balance: card.balance });
     } catch (err) {
-      if (err.code === 'CARD_NOT_FOUND') return res.status(409).json(CARD_NOT_FOUND);
-
       console.error(err);
       return res.status(500).end();
     }
@@ -77,19 +78,23 @@ export const deposit = async (req, res) => {
 };
 
 export const withdraw = async (req, res) => {
-  if (req.params.id && req.body.amount) {
+  if (req && req.params && req.params.id && req.body && req.body.amount) {
+    const { params: { id }, body: { amount } } = req;
     try {
-      const card = await amendBalance(req.params.id, -req.body.amount);
-      return res.status(200).json({ balance: card.balance });
-    } catch (err) {
-      if (err.code === 'NOT_ENOUGH_CREDITS') {
+      const card = await getCard(id);
+
+      if (card === null) return res.status(409).json(CARD_NOT_FOUND);
+
+      if (card.balance - amount < 0) {
         return res
           .status(409)
           .json({ code: 'INSUFFICIENT_BALANCE', message: 'Not enough credits on the card' });
       }
 
-      if (err.code === 'CARD_NOT_FOUND') return res.status(409).json(CARD_NOT_FOUND);
+      const updatedCard = await amendBalance(id, -amount);
 
+      return res.status(200).json({ balance: updatedCard.balance });
+    } catch (err) {
       console.error(err);
       return res.status(500).end();
     }
