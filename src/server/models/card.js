@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const TransactionSchema = new Schema(
   {
     amount: {
-      max: 1000,
+      max: 16384,
       min: 1,
       required: true,
       type: Number,

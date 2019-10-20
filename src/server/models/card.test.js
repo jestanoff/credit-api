@@ -147,7 +147,7 @@ describe('db queries', () => {
       expect(result).toStrictEqual({
         cardId: 'getMeThisCard',
         $inc: { balance: 80 },
-        $push: { transactions: { amount: 80, type: 'deposit' }},
+        $push: { transactions: { amount: 80, type: 'deposit' } },
         options: { new: true, runValidators: true },
       });
     });
