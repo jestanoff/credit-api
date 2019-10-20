@@ -1,7 +1,7 @@
 export const mocks = {
   find: jest.fn(),
   findOne: jest.fn().mockReturnValue({ balance: 0, cardId: 'singleCard' }),
-  findOneAndUpdate: jest.fn(({ cardId }, props) => ({ cardId, ...props })),
+  findOneAndUpdate: jest.fn(({ cardId }, props, options) => ({ cardId, ...props, options })),
   instance: jest.fn(),
   limit: jest.fn().mockReturnValue([{ id: 1 }, { id: 2 }]),
   path: jest.fn(),
