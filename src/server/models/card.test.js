@@ -190,7 +190,10 @@ describe('db queries', () => {
       expect(result).toStrictEqual({
         balance: 100,
         cardId: 'getMeThisCard',
-        transactions: [{ amount: 80, type: 'deposit' }],
+        $push: {
+          transactions: { amount: 80, type: 'deposit' },
+        },
+        options: { new: true },
       });
     });
 
@@ -202,7 +205,8 @@ describe('db queries', () => {
       expect(result).toStrictEqual({
         balance: 21,
         cardId: 'getMeThisCard',
-        transactions: [{ amount: 1, type: 'deposit' }],
+        $push: { transactions: { amount: 1, type: 'deposit' } },
+        options: { new: true },
       });
     });
 
@@ -213,7 +217,8 @@ describe('db queries', () => {
       expect(result).toStrictEqual({
         balance: 2,
         cardId: 'decreasedCard',
-        transactions: [{ amount: 18, type: 'withdraw' }],
+        $push: { transactions: { amount: 18, type: 'withdraw' } },
+        options: { new: true },
       });
     });
 
@@ -224,7 +229,8 @@ describe('db queries', () => {
       expect(result).toStrictEqual({
         balance: 19,
         cardId: 'decreasedCard',
-        transactions: [{ amount: 1, type: 'withdraw' }],
+        $push: { transactions: { amount: 1, type: 'withdraw' } },
+        options: { new: true },
       });
     });
   });

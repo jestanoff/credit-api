@@ -9,6 +9,10 @@ const TransactionSchema = new Schema(
       required: true,
       type: Number,
     },
+    createdAt: {
+      default: Date.now,
+      type: Date,
+    },
     type: {
       enum: ['deposit', 'withdraw'],
       required: true,
@@ -18,7 +22,6 @@ const TransactionSchema = new Schema(
   {
     autoIndex: false,
     strict: true,
-    timestamps: true,
   },
 );
 const CardSchema = new Schema(
@@ -93,12 +96,13 @@ export const amendBalance = async (cardId, amount) => {
     throw err;
   }
 
-  const transactions = [...card.transactions,
-    new Transaction({
-      amount: Math.abs(amount),
-      type: Math.sign(amount) === -1 ? 'withdraw' : 'deposit',
-    }),
-  ];
+  const transaction = new Transaction({
+    amount: Math.abs(amount),
+    type: Math.sign(amount) === -1 ? 'withdraw' : 'deposit',
+  });
 
-  return Card.findOneAndUpdate({ cardId }, { balance, transactions }, { new: true });
+  return Card.findOneAndUpdate(
+    { cardId },
+    { balance, $push: { transactions: transaction } }, { new: true },
+  );
 };

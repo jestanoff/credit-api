@@ -20,6 +20,10 @@ Array [
               "required": true,
               "type": [Function],
             },
+            "createdAt": Object {
+              "default": [Function],
+              "type": [Function],
+            },
             "type": Object {
               "enum": Array [
                 "deposit",
@@ -32,7 +36,6 @@ Array [
           "options": Object {
             "autoIndex": false,
             "strict": true,
-            "timestamps": true,
           },
           "path": [MockFunction] {
             "calls": Array [
@@ -89,6 +92,10 @@ Array [
                 "required": true,
                 "type": [Function],
               },
+              "createdAt": Object {
+                "default": [Function],
+                "type": [Function],
+              },
               "type": Object {
                 "enum": Array [
                   "deposit",
@@ -101,7 +108,6 @@ Array [
             "options": Object {
               "autoIndex": false,
               "strict": true,
-              "timestamps": true,
             },
             "path": [MockFunction] {
               "calls": Array [
@@ -167,6 +173,10 @@ Array [
       "required": true,
       "type": [Function],
     },
+    "createdAt": Object {
+      "default": [Function],
+      "type": [Function],
+    },
     "type": Object {
       "enum": Array [
         "deposit",
@@ -179,7 +189,6 @@ Array [
   Object {
     "autoIndex": false,
     "strict": true,
-    "timestamps": true,
   },
 ]
 `;
@@ -195,6 +204,10 @@ Array [
         "required": true,
         "type": [Function],
       },
+      "createdAt": Object {
+        "default": [Function],
+        "type": [Function],
+      },
       "type": Object {
         "enum": Array [
           "deposit",
@@ -207,7 +220,6 @@ Array [
     "options": Object {
       "autoIndex": false,
       "strict": true,
-      "timestamps": true,
     },
     "path": [MockFunction] {
       "calls": Array [
