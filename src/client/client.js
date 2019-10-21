@@ -8,8 +8,10 @@ import getBalance from './requests/getBalance.js';
 import deposit from './requests/deposit.js';
 import withdraw from './requests/withdraw.js';
 
+// TODO: Remove once we got real certificate
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+
 export default async () => {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
   let authToken;
   let balance;
   let balanceAfterDeposit;
@@ -24,16 +26,19 @@ export default async () => {
   });
   const parser = port.pipe(new ByteLength({ length: 12 }));
 
-  port.write([171, 86, 1, 1, 123, 175, 31, 104, 0, 0, 89, 148]); // Read
-  // port.write(Buffer.from('AB5601017BAF1F68010ED9C0', 'hex'));
+  port.write([171, 86, 1, 1, 123, 175, 31, 104, 0, 0, 89, 148]); // Read dec
+  // port.write(Buffer.from('AB5601017BAF1F68010ED9C0', 'hex')); // Read
   port.write(Buffer.from('AB5602017BAF1F680064186A', 'hex')); // Add
-  port.write(Buffer.from('AB5603017BAF1F680001198D', 'hex'));
-  port.write(Buffer.from('AB560400000000000000D130', 'hex'));
+  port.write(Buffer.from('AB5603017BAF1F680001198D', 'hex')); // Decrease
+  port.write(Buffer.from('AB560400000000000000D130', 'hex')); // Error
 
   parser.on('close', () => console.log('closed'));
   parser.on('error', err => console.log('err', err));
   parser.on('open', () => console.log('opened'));
   parser.on('drain', () => console.log('drain'));
+
+  authToken = await authenticate();
+  console.log(`Authenticated with token ${authToken}`);
 
   // Switches the port into "flowing mode"
   parser.on('data', async data => {
@@ -46,13 +51,11 @@ export default async () => {
 
     const {
       cardId,
-      // checksum,
       command,
       credits,
-      // start,
     } = hexRequestParser(data.toString('hex'));
-    console.log('authToken', authToken);
-    if (authToken === undefined) {
+
+    if (!authToken) {
       authToken = await authenticate();
       console.log(`Authenticated with token ${authToken}`);
     }
@@ -73,7 +76,7 @@ export default async () => {
     }
 
     if (command === commands.CRC_ERROR) {
-      console.log('CRC_ERROR it is');
+      console.log('CRC_ERROR');
     }
   });
 };
