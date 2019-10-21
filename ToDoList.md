@@ -28,3 +28,4 @@
     - whitelist ips  
 15. Continued Integration / Continued Deployment on GitLab
 16. Sort errors handling [Error Handling in node.js](https://www.joyent.com/node-js/production/design/errors)
+17. Introduce server and client logging. Best if we get a good free logging framework
