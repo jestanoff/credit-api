@@ -7,6 +7,7 @@ import authenticate from './requests/authenticate.js';
 import getBalance from './requests/getBalance.js';
 import deposit from './requests/deposit.js';
 import withdraw from './requests/withdraw.js';
+import checksum from './requests/checksum.js';
 
 // TODO: Remove once we got real certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
@@ -30,7 +31,7 @@ export default async () => {
   // port.write(Buffer.from('AB5601017BAF1F68010ED9C0', 'hex')); // Read
   port.write(Buffer.from('AB5602017BAF1F680064186A', 'hex')); // Add
   port.write(Buffer.from('AB5603017BAF1F680001198D', 'hex')); // Decrease
-  port.write(Buffer.from('AB560400000000000000D130', 'hex')); // Error
+  port.write(Buffer.from('AB560100000000110000D130', 'hex')); // Message with wrong checksum
 
   parser.on('close', () => console.log('closed'));
   parser.on('error', err => console.log('err', err));
@@ -58,6 +59,12 @@ export default async () => {
     if (!authToken) {
       authToken = await authenticate();
       console.log(`Authenticated with token ${authToken}`);
+    }
+
+    if (checksum(data) !== 0) {
+      console.log(`Message 0x${data.toString('hex').toUpperCase()} has wrong checksum`);
+      // Returns a pre-difined error when the checksum is incorrect
+      port.write(Buffer.from('AB560400000000000000D130', 'hex'));
     }
 
     if (command === commands.READ) {
