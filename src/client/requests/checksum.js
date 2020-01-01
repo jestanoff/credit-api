@@ -1,17 +1,33 @@
 /* eslint-disable no-bitwise */
-const talbeAbs = [
-  0x0000, 0xcc01, 0xd801, 0x1400, 0xf001, 0x3c00, 0x2800, 0xe401,
-  0xa001, 0x6c00, 0x7800, 0xb401, 0x5000, 0x9c01, 0x8801, 0x4400,
-];
+import { TABLE_ABS, TABLE_CRC } from '../constants.js';
 
-export default buffer => {
+// CRC16 Modbus checksum algorithm
+
+export const check = buffer => {
   let crc = 0xffff;
 
   for (let i = 0; i < buffer.length; i += 1) {
     const ch = buffer[i];
-    crc = talbeAbs[(ch ^ crc) & 15] ^ (crc >> 4);
-    crc = talbeAbs[((ch >> 4) ^ crc) & 15] ^ (crc >> 4);
+    crc = TABLE_ABS[(ch ^ crc) & 15] ^ (crc >> 4);
+    crc = TABLE_ABS[((ch >> 4) ^ crc) & 15] ^ (crc >> 4);
   }
 
   return crc;
+};
+
+export const generate = (buffer, previous) => {
+  const table = typeof Int32Array === 'undefined' ? TABLE_CRC : new Int32Array(TABLE_CRC);
+
+  // if (!Buffer.isBuffer(buffer)) buf = Buffer.from(buffer);
+
+  const buf = Buffer.from(buffer);
+
+  let crc = typeof previous === 'undefined' ? 0xffff : ~~previous;
+
+  for (let index = 0; index < buf.length; index += 1) {
+    const byte = buf[index];
+    crc = ((table[(crc ^ byte) & 0xff] ^ (crc >> 8)) & 0xffff);
+  }
+
+  return ((crc << 8) & 0xff00) | ((crc >> 8) & 0x00ff);
 };

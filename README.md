@@ -1,3 +1,17 @@
+# API Server app
+First run MongoDB manually as a background process
+> mongod --config /usr/local/etc/mongod.conf --fork
+
+Then start the express application
+> yarn server
+
+
+# Client proxy app
+The client application is a simple proxy that translates the serial port 12 bits commands to http API requests and then the responses to 12 bits commands.
+
+To run the client application:
+> yarn client
+
 # Car Wash RESTful API
 
 ## Create new card

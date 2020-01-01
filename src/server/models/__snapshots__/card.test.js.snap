@@ -15,7 +15,7 @@ Array [
         Object {
           "definition": Object {
             "amount": Object {
-              "max": 1000,
+              "max": 16384,
               "min": 1,
               "required": true,
               "type": [Function],
@@ -87,7 +87,7 @@ Array [
           Object {
             "definition": Object {
               "amount": Object {
-                "max": 1000,
+                "max": 16384,
                 "min": 1,
                 "required": true,
                 "type": [Function],
@@ -168,7 +168,7 @@ exports[`Transaction model should create a Transaction schema 1`] = `
 Array [
   Object {
     "amount": Object {
-      "max": 1000,
+      "max": 16384,
       "min": 1,
       "required": true,
       "type": [Function],
@@ -199,7 +199,7 @@ Array [
   Object {
     "definition": Object {
       "amount": Object {
-        "max": 1000,
+        "max": 16384,
         "min": 1,
         "required": true,
         "type": [Function],

@@ -5,7 +5,6 @@ export default req => {
       command: req.slice(4, 6),
       cardId: req.slice(6, 16),
       credits: req.slice(16, 20),
-      checksum: req.slice(20, 24),
     };
   }
 
