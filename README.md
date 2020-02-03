@@ -1,3 +1,6 @@
+# Virtual credit payment system
+A system that allows Jet Wash payment controllers to store card credits on the cloud
+
 # API Server app
 First run MongoDB manually as a background process
 > mongod --config /usr/local/etc/mongod.conf --fork
