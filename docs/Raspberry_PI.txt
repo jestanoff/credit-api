@@ -1,0 +1,33 @@
+sudo apt-get update
+sudo apt-get upgrade
+#sudo apt-get install python3-scipy
+sudo rbi-update
+
+sudo raspi-config
+
+#follow https://www.electronicwings.com/raspberry-pi/raspberry-pi-uart-communication-using-python-and-c
+
+# boot settings:
+sudo nano /boot/config.txt 
+enable_uart=1
+
+# swap ttyS0 and ttyAMA0 (better comport)
+dtoverlay=pi3-miniuart-bt 
+
+# edits boot file:
+crontab -e
+
+#TODO: add this to docker image 
+#setting com port baud 115200 and data=8bits 
+@reboot sudo stty -F /dev/ttyAMA0 115200 cs8
+
+# shows PI's map
+ls -l /dev
+
+#sends string to com-port
+echo "Hello" > /dev/ttyAMA0
+sudo od -t x1 -w12 /dev/ttyAMA0
+
+#https://spellfoundry.com/2016/05/29/configuring-gpio-serial-port-raspbian-jessie-including-pi-3-4/
+
+#Local IP: pi@192.168.0.45 - default password

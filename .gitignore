@@ -25,3 +25,7 @@ coverage
 
 # Benchmarking
 benchmarks/graphs
+
+# Certs
+server.cert
+server.key
