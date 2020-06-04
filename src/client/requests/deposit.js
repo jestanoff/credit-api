@@ -1,9 +1,10 @@
 import axios from 'axios';
+import env from '../environment.js';
 
 export default async ({ amount, authToken, cardId }) => {
   try {
     const req = await axios.request({
-      baseURL: 'https://localhost',
+      baseURL: env.server,
       headers: {
         'Content-Type': 'application/json',
         Authorization: authToken,

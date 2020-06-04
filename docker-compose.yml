@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+  client:
+    build: . 
+    ports:
+      - "443:443"
+    volumes:
+      - ./src:/usr/src/app/src:cached
+    links:
+      - mongodb
+  mongodb:
+    image: mongo:4.2
+volumes:
+  db-data:

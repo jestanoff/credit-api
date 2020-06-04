@@ -1,9 +1,10 @@
 import axios from 'axios';
+import env from '../environment.js';
 
 export default async () => {
   try {
     const req = await axios.request({
-      baseURL: 'https://localhost',
+      baseURL: env.server,
       headers: { 'Content-Type': 'application/json' },
       data: { password: '12345', username: 'admin' },
       method: 'POST',
