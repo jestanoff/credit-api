@@ -10,8 +10,7 @@ WORKDIR /usr/src/app
 RUN apk --no-cache update && \
     apk add --no-cache tini && \
     rm -rf /var/cache/apk && \
-    apk add --no-cache make gcc g++ python linux-headers udev && \
-    python --version && node --version
+    apk add --no-cache make gcc g++ python linux-headers udev
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
