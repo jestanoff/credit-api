@@ -1,6 +1,4 @@
 import SerialPort from 'serialport';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import MockBinding from '@serialport/binding-mock';
 import ByteLength from '@serialport/parser-byte-length';
 import hexRequestParser from './hexRequestParser.js';
 import authenticate from './requests/authenticate.js';
@@ -32,32 +30,15 @@ export default async () => {
   let generatedChecksum;
   let message;
 
-  SerialPort.Binding = MockBinding;
-  MockBinding.createPort('/dev/tty.SerialInputPort', { echo: true, readyData: '', record: true });
-  MockBinding.createPort('/dev/tty.SerialOutputPort', {
-    echo: false,
-    readyData: '',
-    record: true,
-  });
+  const serialPort = new SerialPort('/dev/ttyAMA0', { baudRate: 115200 });
+  const parser = new ByteLength({ length: 12 });
+  const serialPortParser = serialPort.pipe(parser);
 
-  // const inputPort = new SerialPort('/dev/ttyAMA0', { baudRate: 115200 });
-  const inputPort = new SerialPort('/dev/tty.SerialInputPort', { baudRate: 115200 });
-  const outputPort = new SerialPort('/dev/tty.SerialOutputPort', {
-    baudRate: 115200,
-  });
-  const parserInput = inputPort.pipe(new ByteLength({ length: 12 }));
-  const parserOutput = outputPort.pipe(new ByteLength({ length: 12 }));
-
-  inputPort.on('open', () => console.log(`DEBUG  (${getTimestamp()}): input port opened`));
-  inputPort.on('close', () => console.log(`DEBUG  (${getTimestamp()}): input port closed`));
-  inputPort.on('error', (err) => console.log(`DEBUG  (${getTimestamp()}): input port err`, err));
-  inputPort.on('drain', () => console.log(`DEBUG  (${getTimestamp()}): input port drain`));
+  serialPort.on('open', () => console.log(`DEBUG  (${getTimestamp()}): serial port opened`));
+  serialPort.on('close', () => console.log(`DEBUG  (${getTimestamp()}): serial port closed`));
+  serialPort.on('error', (err) => console.log(`DEBUG  (${getTimestamp()}): serial port err`, err));
+  serialPort.on('drain', () => console.log(`DEBUG  (${getTimestamp()}): serial port drain`));
   // TODO: Try to trigger
-
-  outputPort.on('open', () => console.log(`DEBUG  (${getTimestamp()}): output port opened`));
-  outputPort.on('close', () => console.log(`DEBUG  (${getTimestamp()}): output port closed`));
-  outputPort.on('error', (err) => console.log(`DEBUG  (${getTimestamp()}): output port err`, err));
-  outputPort.on('drain', () => console.log(`DEBUG  (${getTimestamp()}): output port drain`));
 
   authToken = await authenticate();
   console.log(
@@ -65,7 +46,7 @@ export default async () => {
   );
 
   // Switches the port into 'flowing mode'
-  parserInput.on('data', async (data) => {
+  serialPortParser.on('data', async (data) => {
     const { cardId, command, credits } = hexRequestParser(data.toString('hex'));
     console.log(
       `INPUT  (${getTimestamp()}): 0x${data.toString('hex').toUpperCase()}`,
@@ -94,7 +75,7 @@ export default async () => {
           console.log(
             `DEBUG  (${getTimestamp()}): read ${message}${generatedChecksum}`,
           );
-          outputPort.write(`${message}${generatedChecksum}`);
+          serialPortParser.write(`${message}${generatedChecksum}`);
           break;
         case COMMANDS.ADD:
           balanceAfterDeposit = await deposit({
@@ -121,7 +102,7 @@ export default async () => {
           break;
         default:
           console.log(`DEBUG  (${getTimestamp()}): NO_COMMAND_MATCH_ERROR`);
-          outputPort.write(NO_COMMAND_MATCH_ERROR);
+          serialPortParser.write(NO_COMMAND_MATCH_ERROR);
       }
     } else {
       console.log(
@@ -130,33 +111,7 @@ export default async () => {
           .toUpperCase()} has wrong checksum`,
       );
       // Returns a pre-defined error when the checksum is incorrect
-      parserOutput.write(CHECKSUM_ERROR);
+      serialPortParser.write(CHECKSUM_ERROR);
     }
   });
-
-  parserOutput.on('data', async (data) => {
-    console.log(
-      `OUTPUT (${getTimestamp()}): 0x${data.toString('hex').toUpperCase()}`,
-    );
-  });
-
-  const runTestCommands = (parser) => {
-    // parser.write([171, 86, 1, 1, 123, 175, 31, 104, 0, 0, 89, 148]); // Read dec
-    parser.write(Buffer.from('AB5601017BAF1F68010ED9C0', 'hex')); // Read
-    setTimeout(
-      () => parser.write(Buffer.from('AB5602017BAF1F680064186A', 'hex')),
-      500,
-    ); // Add
-    setTimeout(
-      () => parser.write(Buffer.from('AB5603017BAF1F680001198D', 'hex')),
-      1000,
-    ); // Decrease
-    setTimeout(
-      () => parser.write(Buffer.from('AB560100000000110000D130', 'hex')),
-      1500,
-    ); // Message with wrong checksum
-    setTimeout(() => parser.close(), 2000);
-  };
-
-  runTestCommands(inputPort);
 };
