@@ -9,12 +9,12 @@ export default async ({ amount, authToken, cardId }) => {
         'Content-Type': 'application/json',
         Authorization: authToken,
       },
-      data: { amount },
+      data: { amount: parseInt(amount, 16) },
       method: 'POST',
       url: `api/cards/${cardId}/deposit`,
     });
     const { data } = req || { data: {} };
-    return data && data.balance;
+    return data && data.balance.toString(16).padStart(4, '0');
   } catch (err) {
     if (err.response && err.response.data) {
       console.log(err.response.data.message);

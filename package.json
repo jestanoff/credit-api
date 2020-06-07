@@ -12,6 +12,7 @@
     "lint": "eslint src/",
     "server": "nodemon --watch src/server --experimental-modules src/server/index.js",
     "client": "nodemon --watch src/client --experimental-modules src/client/index.js",
+    "client:debug": "DEBUG=true nodemon --watch src/client --experimental-modules src/client/index.js",
     "test": "jest --config=jest.config.js",
     "watch": "jest --config=jest.config.js --watchAll"
   },

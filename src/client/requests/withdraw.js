@@ -14,7 +14,7 @@ export default async ({ amount, authToken, cardId }) => {
       url: `api/cards/${cardId}/withdraw`,
     });
     const { data } = req || { data: {} };
-    return data && data.balance;
+    return data && data.balance.toString(16).padStart(4, '0');
   } catch (err) {
     if (err.response && err.response.data) {
       console.log(err.response.data.message);
