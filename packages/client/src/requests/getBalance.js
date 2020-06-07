@@ -1,5 +1,6 @@
 import axios from 'axios';
 import env from '../environment.js';
+import createCard from './createCard.js';
 
 export default async ({ authToken, cardId }) => {
   try {
@@ -15,11 +16,14 @@ export default async ({ authToken, cardId }) => {
     const { data } = req || { data: {} };
     return data && data.balance.toString(16).padStart(4, '0');
   } catch (err) {
-    if (err.response && err.response.data) {
-      console.log(err.response.data.message);
-    } else {
-      console.error(err);
+    if (err.response.data.code === 'CARD_NOT_FOUND') {
+      let balance = await createCard({ authToken, cardId });
+      return balance;
     }
+
+    if (err.response && err.response.data) {
+      throw new Error(`${err.response.data.message} ${cardId}`);
+    }
+    throw err;
   }
-  return null;
 };

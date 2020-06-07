@@ -1,8 +1,7 @@
 {
-  "name": "carwash-api",
+  "name": "carwash-client",
   "version": "1.0.0",
-  "description": "### **POST /api/cards**",
-  "main": "src/server/index.js",
+  "main": "index.js",
   "type": "module",
   "engines": {
     "node": ">=v12.0.0"
@@ -10,14 +9,15 @@
   "engineStrict": true,
   "scripts": {
     "lint": "eslint src/",
-    "server": "nodemon --watch src/server --experimental-modules src/server/index.js",
-    "client": "nodemon --watch src/client --experimental-modules src/client/index.js",
-    "test": "jest --config=jest.config.js",
-    "watch": "jest --config=jest.config.js --watchAll"
+    "start": "nodemon --watch src --experimental-modules index.js",
+    "server": "node --experimental-modules index.js",
+    "test": "jest --config=../jest.config.js",
+    "test:watch": "jest --config=../jest.config.js --watchAll"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/jestanoff/carwash-api.git"
+    "url": "git+https://gitlab.com/jestanoff/carwash-api.git",
+    "directory": "packages/client"
   },
   "author": "Stefan Dzhestanov",
   "license": "ISC",
@@ -29,12 +29,6 @@
     "@serialport/binding-mock": "^9.0.0",
     "@serialport/parser-byte-length": "^9.0.0",
     "axios": "^0.19.0",
-    "express": "^4.16.4",
-    "helmet": "^3.15.0",
-    "joi": "^14.0.6",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.6.11",
-    "morgan": "^1.9.1",
     "serialport": "^9.0.0"
   },
   "devDependencies": {

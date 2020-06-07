@@ -12,8 +12,8 @@ export default buffer => {
     crc = TABLE_ABS[((ch >> 4) ^ crc) & 15] ^ (crc >> 4);
   }
 
-  if (crc === 0) return 0
-  
-  crc = crc.toString(16).padStart(4, '0')
-  return crc.slice(2) + crc.slice(0, 2)
+  if (crc === 0) return 0;
+
+  crc = crc.toString(16).padStart(4, '0');
+  return crc.slice(2) + crc.slice(0, 2);
 };

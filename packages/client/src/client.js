@@ -13,6 +13,7 @@ import prettyPrintMessage from './prettyPrintMessage.js';
 import {
   CHECKSUM_ERROR,
   COMMANDS,
+  NO_CARD_ERROR,
   NO_COMMAND_MATCH_ERROR,
   SERIAL_PORT_PATH,
   START,
@@ -20,17 +21,17 @@ import {
 
 // TODO: Remove once we got real certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
-const DEBUG = process.env.DEBUG || false;
+const DEBUG = process.env.DEBUG || true;
 
 const cbLogging = error => {
-  if (error) console.log(getTimestamp(), ...args)
-}
+  if (error) console.log(getTimestamp(), error);
+};
 
 const portDetailsLogging = port => {
   console.log('serialPort.baudRate', port.baudRate);
   console.log('serialPort.isOpen', port.isOpen);
   console.log('serialPort.path', port.path);
-}
+};
 
 export default async () => {
   let authToken;
@@ -41,14 +42,14 @@ export default async () => {
   let message;
 
   // Exit if there is no SerialPort to connect to
-  const serialPortList = await SerialPort.list()
+  const serialPortList = await SerialPort.list();
   if (!serialPortList.some(port => port.path === SERIAL_PORT_PATH)) {
     throw new Error(`Serial port ${SERIAL_PORT_PATH} not available`);
   }
 
   const serialPort = new SerialPort(SERIAL_PORT_PATH, { baudRate: 115200 });
   const parser = serialPort.pipe(new ByteLength({ length: 12 }));
-  
+
   serialPort.on('open', () => {
     if (DEBUG) {
       console.log(`${getTimestamp()} SerialPort opened`);
@@ -73,8 +74,8 @@ export default async () => {
     if (!serialPort.isOpen) {
       // If the serialPort is closed kill the process using it
       const cmd = `kill -9 $(fuser ${SERIAL_PORT_PATH} | awk '{print $0}')`;
-      childProcess.exec(cmd, (err, stdout, stderr) => {
-        if (err) console.log(`Node could not kill the process using cmd "${cmd}"`);
+      childProcess.exec(cmd, (error, stdout, stderr) => {
+        if (error) console.log(`Node could not kill the process using cmd "${cmd}"`);
         console.log(`stdout: ${stdout}`);
         console.log(`stderr: ${stderr}`);
         serialPort.open();
@@ -93,9 +94,8 @@ export default async () => {
 
   // Switches the port into 'flowing mode'
   parser.on('data', async data => {
-    
     const { cardId, command, credits } = hexRequestParser(data);
-    
+
     if (DEBUG) prettyPrintMessage(data);
 
     if (!authToken) {
@@ -109,16 +109,19 @@ export default async () => {
     if (calcChecksum(data) === 0) {
       switch (command) {
         case COMMANDS.READ:
-          balance = await getBalance({ authToken, cardId });
-          message = `${START}${COMMANDS.READ}${cardId}${balance}`;
-          generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
-          serialPort.write(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'hex', cbLogging);
-
-          if (DEBUG) {
-            console.log(
-              `${getTimestamp()} READ     ${cardId} has balance ${parseInt(balance, 16)}`,
-            );
-            prettyPrintMessage(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'SENT    ');
+          try {
+            balance = await getBalance({ authToken, cardId });
+            message = `${START}${COMMANDS.READ}${cardId}${balance}`;
+            generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
+            serialPort.write(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'hex', cbLogging);
+            if (DEBUG) {
+              console.log(
+                `${getTimestamp()} READ     ${cardId} has balance ${parseInt(balance, 16)}`,
+              );
+              prettyPrintMessage(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'SENT    ');
+            }
+          } catch (err) {
+            console.log(getTimestamp(), err);
           }
           break;
 
@@ -130,8 +133,8 @@ export default async () => {
 
           if (DEBUG) {
             console.log(
-              `${getTimestamp()} ADD     ${cardId} balance after deposit ${parseInt(balanceAfterDeposit, 16)}`,
-            ); 
+              `${getTimestamp()} ADD      ${cardId} balance after deposit ${parseInt(balanceAfterDeposit, 16)}`,
+            );
             prettyPrintMessage(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'SENT    ');
           }
           break;
@@ -150,7 +153,13 @@ export default async () => {
               prettyPrintMessage(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'SENT    ');
             }
           } catch (err) {
-            console.log(getTimestamp(), err)
+            if (err.response.data.code === 'CARD_NOT_FOUND') {
+              serialPort.write(NO_CARD_ERROR)
+              console.log(`${getTimestamp()} NO_CARD_ERROR`);
+              prettyPrintMessage(Buffer.from(NO_CARD_ERROR, 'hex'), 'SENT    ');
+            } else {
+              console.log(getTimestamp(), err);
+            }
           }
           break;
 
@@ -162,7 +171,6 @@ export default async () => {
           console.log(`${getTimestamp()} NO_COMMAND_MATCH_ERROR`);
           serialPort.write(NO_COMMAND_MATCH_ERROR);
       }
-
     } else {
       if (DEBUG) {
         console.log(
@@ -172,7 +180,7 @@ export default async () => {
       }
       // Returns a pre-defined error when the checksum is incorrect
       serialPort.write(CHECKSUM_ERROR);
-      serialPort.flush(cbLogging)
+      serialPort.flush(cbLogging);
     }
   });
 
@@ -184,7 +192,7 @@ export default async () => {
       console.log(`SerialPort ${serialPort.path} with baud rate ${serialPort.baudRate} is closed`);
     }
     process.exit();
-  }
+  };
   // On regular app exit
   process.on('exit', exitHandler);
   // Catches ctrl+c event
