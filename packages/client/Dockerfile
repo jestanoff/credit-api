@@ -22,4 +22,4 @@ RUN yarn add serialport --build-from-source
 
 COPY ./src /usr/src/app/src
 
-RUN ["yarn", "start"]
+RUN ["yarn", "client"]
