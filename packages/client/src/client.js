@@ -1,5 +1,5 @@
 import SerialPort from 'serialport';
-import ByteLength from '@serialport/parser-byte-length';
+import InterByteTimeout from '@serialport/parser-inter-byte-timeout';
 import childProcess from 'child_process';
 
 import hexRequestParser from './hexRequestParser.js';
@@ -7,7 +7,7 @@ import authenticate from './requests/authenticate.js';
 import getBalance from './requests/getBalance.js';
 import deposit from './requests/deposit.js';
 import withdraw from './requests/withdraw.js';
-import calcChecksum from './requests/calcChecksum.js';
+import calcChecksum from './calcChecksum.js';
 import getTimestamp from './getTimestamp.js';
 import prettyPrintMessage from './prettyPrintMessage.js';
 import {
@@ -16,7 +16,7 @@ import {
   NO_CARD_ERROR,
   NO_COMMAND_MATCH_ERROR,
   SERIAL_PORT_PATH,
-  START,
+  START_BYTES,
 } from './constants.js';
 
 // TODO: Remove once we got real certificate
@@ -48,7 +48,7 @@ export default async () => {
   }
 
   const serialPort = new SerialPort(SERIAL_PORT_PATH, { baudRate: 115200 });
-  const parser = serialPort.pipe(new ByteLength({ length: 12 }));
+  const parser = serialPort.pipe(new InterByteTimeout({ interval: 250 }));
 
   serialPort.on('open', () => {
     if (DEBUG) {
@@ -94,9 +94,12 @@ export default async () => {
 
   // Switches the port into 'flowing mode'
   parser.on('data', async data => {
-    const { cardId, command, credits } = hexRequestParser(data);
+    const { cardId, command, credits, start } = hexRequestParser(data);
 
     if (DEBUG) prettyPrintMessage(data);
+
+    // Discard anything that is not valid response
+    if (start !== START_BYTES) return undefined; 
 
     if (!authToken) {
       authToken = await authenticate();
@@ -106,12 +109,13 @@ export default async () => {
       }
     }
 
+    // Validate the bytes sequence
     if (calcChecksum(data) === 0) {
       switch (command) {
         case COMMANDS.READ:
           try {
             balance = await getBalance({ authToken, cardId });
-            message = `${START}${COMMANDS.READ}${cardId}${balance}`;
+            message = `${START_BYTES}${COMMANDS.READ}${cardId}${balance}`;
             generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
             serialPort.write(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'hex', cbLogging);
             if (DEBUG) {
@@ -127,7 +131,7 @@ export default async () => {
 
         case COMMANDS.ADD:
           balanceAfterDeposit = await deposit({ amount: credits, authToken, cardId });
-          message = `${START}${COMMANDS.ADD}${cardId}${balanceAfterDeposit}`;
+          message = `${START_BYTES}${COMMANDS.ADD}${cardId}${balanceAfterDeposit}`;
           generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
           serialPort.write(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'hex', cbLogging);
 
@@ -142,7 +146,7 @@ export default async () => {
         case COMMANDS.DECREASE:
           try {
             balanceAfterWithdraw = await withdraw({ amount: credits, authToken, cardId });
-            message = `${START}${COMMANDS.DECREASE}${cardId}${balanceAfterWithdraw}`;
+            message = `${START_BYTES}${COMMANDS.DECREASE}${cardId}${balanceAfterWithdraw}`;
             generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
             serialPort.write(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'hex', cbLogging);
 

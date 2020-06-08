@@ -30,4 +30,12 @@ sudo od -t x1 -w12 /dev/ttyAMA0
 
 #https://spellfoundry.com/2016/05/29/configuring-gpio-serial-port-raspbian-jessie-including-pi-3-4/
 
-#Local IP: pi@192.168.0.45 - default password
+# Local IP with default password
+ssh pi@192.168.0.45
+# host: pi@raspberrypi - default password
+ssh pi@raspberrypi
+#Iliyan raspberry - ngrok.com https://dashboard.ngrok.com/status/tunnels
+ssh pi@0.tcp.ngrok.io -p17467
+
+# startup scripts in /etc/rc.local
+sudo nano /etc/rc.local

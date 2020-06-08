@@ -11,6 +11,7 @@ export default async ({ amount, authToken, cardId }) => {
       },
       data: { amount: parseInt(amount, 16) },
       method: 'POST',
+      timeout: 5000,
       url: `api/cards/${cardId}/deposit`,
     });
     const { data } = req || { data: {} };

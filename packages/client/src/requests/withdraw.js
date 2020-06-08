@@ -12,6 +12,7 @@ export default async ({ amount, authToken, cardId }) => {
       },
       data: { amount },
       method: 'POST',
+      timeout: 5000,
       url: `api/cards/${cardId}/withdraw`,
     });
     const { data } = req || { data: {} };

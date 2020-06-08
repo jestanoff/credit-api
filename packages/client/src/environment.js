@@ -1,4 +1,3 @@
 export default {
-  // server: 'https://localhost',
-  server: 'https://192.168.0.13',
+  server: process.env.API_URL || 'https://192.168.0.13',
 };

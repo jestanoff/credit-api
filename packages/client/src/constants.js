@@ -1,4 +1,4 @@
-export const START = 'ab56';
+export const START_BYTES = 'ab56';
 export const COMMANDS = {
   ADD: '02',
   CRC_ERROR: '04',

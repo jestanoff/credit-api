@@ -987,6 +987,11 @@
   resolved "https://registry.yarnpkg.com/@serialport/parser-delimiter/-/parser-delimiter-9.0.0.tgz#1a241deaba80cf0aa6a88d37f60c64647604ec2d"
   integrity sha512-OesbvlJf1BjFC1zde6cnW1RttxZ8BoXGCOiNvM9mLKdvJ06l9o/4HyVCg2bymj6ziy/gz4407pwyPfvVYApE3A==
 
+"@serialport/parser-inter-byte-timeout@^9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@serialport/parser-inter-byte-timeout/-/parser-inter-byte-timeout-9.0.0.tgz#2037ab4bd007e1282f4f7223c366c94e9aab87b3"
+  integrity sha512-fWzQLFP98Fh261a5Y8ZufaUOYhSwm+URqk1O6Nk1ukqVduBqSry41h9+ABaKD+D20ikbIJZ6Gqt7lyUHhfTmYg==
+
 "@serialport/parser-readline@^9.0.0":
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/@serialport/parser-readline/-/parser-readline-9.0.0.tgz#916391300e2e53a9f7b5aa847c989f7723986059"

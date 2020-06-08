@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import { TABLE_ABS } from '../constants.js';
+import { TABLE_ABS } from './constants.js';
 
 // CRC16 Modbus checksum algorithm
 
