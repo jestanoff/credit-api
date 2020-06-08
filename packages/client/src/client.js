@@ -1,6 +1,7 @@
 import SerialPort from 'serialport';
 import InterByteTimeout from '@serialport/parser-inter-byte-timeout';
 import childProcess from 'child_process';
+import axios from 'axios';
 
 import hexRequestParser from './hexRequestParser.js';
 import authenticate from './requests/authenticate.js';
@@ -18,6 +19,9 @@ import {
   SERIAL_PORT_PATH,
   START_BYTES,
 } from './constants.js';
+
+// 5 seconds request timeout for API
+axios.defaults.timeout = 5000;
 
 // TODO: Remove once we got real certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
@@ -90,8 +94,6 @@ export default async () => {
 
   authToken = await authenticate();
 
-  if (DEBUG) console.log(`${getTimestamp()} Authenticated with auth token`);
-
   // Switches the port into 'flowing mode'
   parser.on('data', async data => {
     const { cardId, command, credits, start } = hexRequestParser(data);
@@ -102,10 +104,13 @@ export default async () => {
     if (start !== START_BYTES) return undefined; 
 
     if (!authToken) {
+      // Try to re-authenticate in case the token has expired
       authToken = await authenticate();
 
-      if (DEBUG) {
-        console.log(`${getTimestamp()} RE-Authenticated with token ${authToken}`);
+      if (!authToken) {
+        // If that is not possible bail out
+        console.log(`${getTimestamp()} Could not get authentication token`)
+        return undefined;
       }
     }
 
@@ -157,13 +162,14 @@ export default async () => {
               prettyPrintMessage(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'SENT    ');
             }
           } catch (err) {
-            if (err.response.data.code === 'CARD_NOT_FOUND') {
+            if (err.response && err.response.data && err.response.data.code === 'CARD_NOT_FOUND') {
               serialPort.write(NO_CARD_ERROR)
               console.log(`${getTimestamp()} NO_CARD_ERROR`);
               prettyPrintMessage(Buffer.from(NO_CARD_ERROR, 'hex'), 'SENT    ');
-            } else {
-              console.log(getTimestamp(), err);
+            } else if (err.response) {
+              console.log(`${getTimestamp()} ERROR    ${err.response.status} ${err.response.statusText}`);
             }
+            return undefined;
           }
           break;
 

@@ -12,7 +12,6 @@ export default async ({ authToken, cardId }) => {
       },
       data: { amount: 0 },
       method: 'POST',
-      timeout: 5000,
       url: `api/cards/${cardId}`,
     });
     const { data } = req || { data: {} };

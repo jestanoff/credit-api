@@ -11,7 +11,6 @@ export default async ({ authToken, cardId }) => {
         Authorization: authToken,
       },
       method: 'GET',
-      timeout: 5000,
       url: `api/cards/${cardId}/balance`,
     });
     const { data } = req || { data: {} };
