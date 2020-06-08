@@ -9,7 +9,7 @@ export default async ({ amount, authToken, cardId }) => {
         'Content-Type': 'application/json',
         Authorization: authToken,
       },
-      data: { amount: parseInt(amount, 16) },
+      data: { amount },
       method: 'POST',
       url: `api/cards/${cardId}/deposit`,
     });

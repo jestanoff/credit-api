@@ -28,7 +28,7 @@ axios.defaults.timeout = 5000;
 
 // TODO: Remove once we got real certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
-const DEBUG = process.env.DEBUG || true;
+const DEBUG = process.env.DEBUG || false;
 
 const cbLogging = error => {
   if (error) console.log(getTimestamp(), error);
@@ -43,8 +43,7 @@ const portDetailsLogging = port => {
 export default async () => {
   let authToken;
   let balance;
-  let balanceAfterDeposit;
-  let balanceAfterWithdraw;
+  let duration;
   let generatedChecksum;
   let message;
 
@@ -99,9 +98,10 @@ export default async () => {
 
   // Switches the port into 'flowing mode'
   parser.on('data', async data => {
+    duration = Date.now();
     const { cardId, command, credits, start } = hexRequestParser(data);
 
-    if (DEBUG) prettyPrintMessage(data);
+    if (DEBUG) prettyPrintMessage(data, 'RECEIVED');
 
     // Discard anything that is not valid response
     if (start !== START_BYTES) {
@@ -129,59 +129,48 @@ export default async () => {
             balance = await getBalance({ authToken, cardId });
             message = `${START_BYTES}${COMMANDS.READ}${cardId}${balance}`;
             generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
-            serialPort.write(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'hex', cbLogging);
-            if (DEBUG) {
-              console.log(
-                `${getTimestamp()} READ     ${cardId} has balance ${parseInt(balance, 16)}`,
-              );
-              prettyPrintMessage(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'SENT    ');
-            }
+            message = Buffer.from(`${message}${generatedChecksum}`, 'hex');
+            serialPort.write(message, 'hex', cbLogging);
+            prettyPrintMessage(message, 'DECREASE', Date.now() - duration);
           } catch (err) {
             console.log(getTimestamp(), err);
           }
           break;
 
         case COMMANDS.ADD:
-          // Validates the amount to deposit
           const depositAmount = parseInt(credits, 16);
+          // Validates the amount to deposit
           if (depositAmount > MAX_DEPOSIT || depositAmount < 0) {
-            message = `${START_BYTES}${COMMAND.ADD}${cardId}${DEPOSIT_OVERFLOW_ERROR}`;
-            generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
-          } else {
-            balanceAfterDeposit = await deposit({ amount: credits, authToken, cardId });
-            message = `${START_BYTES}${COMMANDS.ADD}${cardId}${balanceAfterDeposit}`;
-            generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
-          }
-          serialPort.write(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'hex', cbLogging);
-
-          if (DEBUG) {
-            console.log(
-              `${getTimestamp()} ADD      ${cardId} balance after deposit ${parseInt(balanceAfterDeposit, 16)}`,
+            message = Buffer.from(
+              `${START_BYTES}${COMMAND.ADD}${cardId}${DEPOSIT_OVERFLOW_ERROR}`,
+              'hex',
             );
-            prettyPrintMessage(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'SENT    ');
+            generatedChecksum = calcChecksum(message);
+          } else {
+            balance = await deposit({ amount: depositAmount, authToken, cardId });
+            message = `${START_BYTES}${COMMANDS.ADD}${cardId}${balance}`;
+            generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
+            message = Buffer.from(`${message}${generatedChecksum}`, 'hex');
           }
+          serialPort.write(message, 'hex', cbLogging);
+          prettyPrintMessage(message, 'ADD', Date.now() - duration);
           break;
 
         case COMMANDS.DECREASE:
           try {
-            balanceAfterWithdraw = await withdraw({ amount: credits, authToken, cardId });
-            message = `${START_BYTES}${COMMANDS.DECREASE}${cardId}${balanceAfterWithdraw}`;
+            balance = await withdraw({ amount: credits, authToken, cardId });
+            message = `${START_BYTES}${COMMANDS.DECREASE}${cardId}${balance}`;
             generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
-            serialPort.write(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'hex', cbLogging);
-
-            if (DEBUG) {
-              console.log(
-                `${getTimestamp()} DECREASE ${cardId} balance after withdraw ${parseInt(balanceAfterWithdraw, 16)}`,
-              );
-              prettyPrintMessage(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'SENT    ');
-            }
+            message = Buffer.from(`${message}${generatedChecksum}`, 'hex');
+            serialPort.write(message, 'hex', cbLogging);
+            prettyPrintMessage(message, 'DECREASE', Date.now() - duration);
           } catch (err) {
             if (err.response && err.response.data && err.response.data.code === 'CARD_NOT_FOUND') {
               serialPort.write(NO_CARD_ERROR)
               console.log(`${getTimestamp()} NO_CARD_ERROR`);
               prettyPrintMessage(Buffer.from(NO_CARD_ERROR, 'hex'), 'SENT    ');
             } else if (err.response) {
-              console.log(`${getTimestamp()} ERROR    ${err.response.status} ${err.response.statusText}`);
+              console.log(`${getTimestamp()} ERROR ${err.response.status} ${err.response.statusText}`);
             }
           }
           break;
@@ -191,7 +180,7 @@ export default async () => {
           break;
 
         default:
-          console.log(`${getTimestamp()} NO_COMMAND_MATCH_ERROR`);
+          console.log(`${getTimestamp()} NO_COMMAND_MATCH_ERROR ${Date.now() - duration} ms`);
           serialPort.write(NO_COMMAND_MATCH_ERROR);
       }
     } else {
