@@ -14,8 +14,10 @@ import prettyPrintMessage from './prettyPrintMessage.js';
 import {
   CHECKSUM_ERROR,
   COMMANDS,
+  DEPOSIT_OVERFLOW_ERROR,
   NO_CARD_ERROR,
   NO_COMMAND_MATCH_ERROR,
+  MAX_DEPOSIT,
   SERIAL_PORT_PATH,
   START_BYTES,
 } from './constants.js';
@@ -135,9 +137,16 @@ export default async () => {
           break;
 
         case COMMANDS.ADD:
-          balanceAfterDeposit = await deposit({ amount: credits, authToken, cardId });
-          message = `${START_BYTES}${COMMANDS.ADD}${cardId}${balanceAfterDeposit}`;
-          generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
+          // Validates the amount to deposit
+          const depositAmount = parseInt(credits, 16);
+          if (depositAmount > MAX_DEPOSIT || depositAmount < 0) {
+            message = `${START_BYTES}${COMMAND.ADD}${cardId}${DEPOSIT_OVERFLOW_ERROR}`;
+            generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
+          } else {
+            balanceAfterDeposit = await deposit({ amount: credits, authToken, cardId });
+            message = `${START_BYTES}${COMMANDS.ADD}${cardId}${balanceAfterDeposit}`;
+            generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
+          }
           serialPort.write(Buffer.from(`${message}${generatedChecksum}`, 'hex'), 'hex', cbLogging);
 
           if (DEBUG) {
@@ -169,7 +178,6 @@ export default async () => {
             } else if (err.response) {
               console.log(`${getTimestamp()} ERROR    ${err.response.status} ${err.response.statusText}`);
             }
-            return undefined;
           }
           break;
 
