@@ -11,6 +11,7 @@ import withdraw from './requests/withdraw.js';
 import calcChecksum from './calcChecksum.js';
 import getTimestamp from './getTimestamp.js';
 import prettyPrintMessage from './prettyPrintMessage.js';
+import bufferToText from './bufferToText.js';
 import {
   CHECKSUM_ERROR,
   COMMANDS,
@@ -103,7 +104,11 @@ export default async () => {
     if (DEBUG) prettyPrintMessage(data);
 
     // Discard anything that is not valid response
-    if (start !== START_BYTES) return undefined; 
+    if (start !== START_BYTES) {
+      const text = bufferToText(data);
+      if (text.length >= 2) console.log(getTimestamp(), text);
+      return undefined; 
+    }
 
     if (!authToken) {
       // Try to re-authenticate in case the token has expired
