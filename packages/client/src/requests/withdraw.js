@@ -1,6 +1,5 @@
 import axios from 'axios';
 import env from '../environment.js';
-import getTimestamp from '../getTimestamp.js';
 
 export default async ({ amount, authToken, cardId }) => {
   try {

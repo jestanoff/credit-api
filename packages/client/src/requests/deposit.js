@@ -1,5 +1,6 @@
 import axios from 'axios';
 import env from '../environment.js';
+import getTimestamp from '../getTimestamp.js';
 
 export default async ({ amount, authToken, cardId }) => {
   try {
@@ -17,9 +18,11 @@ export default async ({ amount, authToken, cardId }) => {
     return data && data.balance.toString(16).padStart(4, '0');
   } catch (err) {
     if (err.response && err.response.data) {
-      console.log(err.response.data.message);
+      console.log(`${getTimestamp()} ERROR ${err.response.data.message}`);
+    } else if (err.response) {
+      console.log(`${getTimestamp()} ERROR ${err.response.status} ${err.response.statusText}`);
     } else {
-      console.error(err);
+      console.log(`${getTimestamp()} ERROR ${err}`);
     }
   }
   return null;
