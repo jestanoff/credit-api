@@ -16,7 +16,6 @@ import handleProcessExit from './handleProcessExit.js';
 import {
   CARD_NOT_FOUND_ERROR,
   CHECKSUM_ERROR,
-  COMMAND_ERROR,
   COMMANDS,
   DEPOSIT_OVERFLOW_ERROR,
   INSUFFICIENT_BALANCE_ERROR,
@@ -176,12 +175,6 @@ export default async () => {
             console.log(`${getTimestamp()} ERROR ${err.response.status} ${err.response.statusText}`);
           }
           break;
-        case COMMANDS.CRC_ERROR:
-          message = `${START_BYTES}${COMMANDS.CRC_ERROR}${cardId}${COMMAND_ERROR}`;
-          generatedChecksum = calcChecksum(Buffer.from(message, 'hex'));
-          message = Buffer.from(`${message}${generatedChecksum}`, 'hex');
-          serialPort.write(message, 'hex', cbLogging);
-          prettyPrintMessage(message, 'COMMAND_ERROR', Date.now() - duration);
         default:
       }
     } else {
