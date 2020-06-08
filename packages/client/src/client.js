@@ -55,7 +55,7 @@ export default async () => {
   }
 
   const serialPort = new SerialPort(SERIAL_PORT_PATH, { baudRate: 115200 });
-  const parser = serialPort.pipe(new InterByteTimeout({ interval: 250 }));
+  const parser = serialPort.pipe(new InterByteTimeout({ interval: 5 }));
 
   serialPort.on('open', () => {
     if (DEBUG) {
