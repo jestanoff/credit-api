@@ -4,11 +4,10 @@ export const COMMANDS = {
   DECREASE: '03',
   READ: '01',
 };
+export const REQUEST_TIMEOUT = 5000; // 5 seconds
+export const MAX_DEPOSIT = 50;
 export const SERIAL_PORT_PATH = '/dev/ttyAMA0';
 export const CHECKSUM_ERROR = '0000';
-export const MAX_DEPOSIT = 9999;
-
-// TODO: Ask what error should this be?
 export const CARD_NOT_FOUND_ERROR = 'ff00';
 export const DEPOSIT_OVERFLOW_ERROR = 'ffff';
 export const INSUFFICIENT_BALANCE_ERROR = 'fff0';

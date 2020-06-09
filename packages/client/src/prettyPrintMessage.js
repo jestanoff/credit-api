@@ -1,15 +1,16 @@
 import getTimestamp from './getTimestamp.js';
 import hexRequestParser from './hexRequestParser.js';
+import log from './log.js'
 
 export default (message, action = '', duration = '') => {
   if (message.length === 12) {
     const {
-      cardId, checksum, command, credits, start,
+      cardId, checksum, command, credits,
     } = hexRequestParser(message);
-    console.log(
-      `${getTimestamp()} ${action} ${command} ${cardId} ${credits} ${checksum}${duration ? ' | ' + duration + ' ms' : ''} | ${parseInt(credits, 16)}`,
+    log(
+      `${getTimestamp()} ${action} ${command} ${cardId} ${credits.toString(16).padStart(4, '0')} ${checksum}${duration ? ' | ' + duration + ' ms' : ''} | ${credits}`,
     );
   } else {
-    console.log(`${getTimestamp()} ${action} ${message.toString('hex')}`)
+    log(`${getTimestamp()} ${action} ${message.toString('hex')}`)
   }
 };
