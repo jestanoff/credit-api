@@ -1,3 +1,3 @@
 export default {
-  server: process.env.API_URL || 'https://192.168.0.13',
+  server: 'https://ec2-3-120-26-81.eu-central-1.compute.amazonaws.com:3000',
 };
