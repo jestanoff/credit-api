@@ -9,7 +9,7 @@
   "engineStrict": true,
   "scripts": {
     "lint": "eslint src/",
-    "dev": "nodemon --watch src/server --experimental-modules index.js",
+    "dev": "nodemon --watch src --experimental-modules index.js",
     "server": "node --experimental-modules index.js",
     "test": "jest --config=../jest.config.js",
     "test:watch": "jest --config=../jest.config.js --watchAll"
@@ -26,6 +26,7 @@
   },
   "homepage": "https://gitlab.com/jestanoff/carwash-api#readme",
   "dependencies": {
+    "dynamoose": "^2.2.1",
     "express": "^4.16.4",
     "helmet": "^3.15.0",
     "joi": "^14.0.6",

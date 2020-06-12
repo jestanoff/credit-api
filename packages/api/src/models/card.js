@@ -1,96 +1,98 @@
-import mongoose from 'mongoose';
+import dynamoose from 'dynamoose';
 
-const { Schema } = mongoose;
-const TransactionSchema = new Schema(
+dynamoose.aws.sdk.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+// dynamoose.aws.ddb.local();
+
+const CardSchema = new dynamoose.Schema(
   {
-    amount: {
-      max: 16384,
-      min: 1,
-      required: true,
-      type: Number,
-    },
-    createdAt: {
-      default: Date.now,
-      type: Date,
-    },
-    type: {
-      enum: ['deposit', 'withdraw'],
-      required: true,
+    id: {
       type: String,
+      hashKey: true,
+      required: true,
     },
-  },
-  {
-    autoIndex: false,
-    strict: true,
-  },
-);
-const CardSchema = new Schema(
-  {
     balance: {
-      default: 0,
-      max: 1000,
-      min: 0,
       type: Number,
+      default: 0,
+      validate: val => val >= 0 && val <= 9999,
     },
-    cardId: String,
     transactions: {
-      type: [TransactionSchema],
+      type: Array,
+      default: [],
+      schema: [{
+        type: Object,
+        schema: {
+          amount: {
+            type: Number,
+            validate: val => val >= 0 && val <= 9999,
+            required: true,
+          },
+          createdAt: {
+            type: Date,
+            // TODO: there is a bug with nested schemas containing both required and default attr
+            // work around is to require createdAt and then always set it to the current timestamp
+            // default: Date.now,
+            set: Date.now,
+            required: true,
+          },
+          type: {
+            type: String,
+            enum: ['deposit', 'withdraw'],
+            required: true,
+          },
+        },
+      }],
     },
   },
   {
-    autoIndex: false,
-    strict: true,
     timestamps: true,
   },
 );
-const Card = mongoose.model('Card', CardSchema);
-CardSchema.path('cardId', {
-  required: true,
-  type: String,
-  unique: true,
-  validate: {
-    validator: async (value) => {
-      const card = await Card.findOne({ cardId: value });
+const Card = dynamoose.model('Cards', CardSchema);
 
-      return card
-        ? Promise.reject(new Error(`Card with id ${card.cardId} already exists`))
-        : Promise.resolve('Card created');
-    },
-  },
-});
+export const getCards = () => Card.scan().exec();
 
-const Transaction = mongoose.model('Transaction', TransactionSchema);
+export const getCard = id => Card.get({ id });
 
-export const getCards = (limit = 50) => Card.find().limit(limit);
+export const createCard = async id => {
+  const existingCard = await getCard(id);
+  if (existingCard && existingCard.id) {
+    const err = new Error(`Card with id ${id} already exists`);
+    err.code = 'CARD_ALREADY_EXISTS';
+    return Promise.reject(err);
+  }
+  return new Card({ id }).save();
+};
 
-export const createCard = cardId => new Card({ cardId }).save();
-
-export const getCard = cardId => Card.findOne({ cardId });
-
-export const amendBalance = async (cardId, amount) => {
-  if (!cardId) {
+export const amendBalance = async (id, amount) => {
+  if (!id) {
     const err = new Error('cardId is required');
     err.code = 'CARD_ID_REQUIRED';
     throw err;
   }
 
-  if (!amount || Number(amount) === 0) {
+  if (amount === undefined) {
     const err = new Error('amount is required');
     err.code = 'AMOUNT_REQUIRED';
     throw err;
   }
 
-  const transaction = new Transaction({
+  const transaction = {
     amount: Math.abs(amount),
+    createdAt: Date.now(),
     type: Math.sign(amount) === -1 ? 'withdraw' : 'deposit',
-  });
+  };
 
-  return Card.findOneAndUpdate(
-    { cardId },
-    {
-      $inc: { balance: amount },
-      $push: { transactions: transaction },
-    },
-    { runValidators: true, new: true },
+  // Using dynamoose.Condition to minimize querying the document
+  // as checking for insufficient balance is needed on withdraw
+  const conditionAmount = Math.sign(amount) === -1 ? Math.abs(amount) : 0;
+  const condition = new dynamoose.Condition().filter('balance').ge(Math.abs(conditionAmount));
+  return Card.update(
+    { id },
+    { $ADD: { balance: amount, transactions: transaction } },
+    { condition },
   );
 };

@@ -19,12 +19,12 @@ export const create = (req, res) => {
     return createCard(req.params.id)
       .then(card => res.status(201).json(card))
       .catch(err => {
-        if (err && err.errors && err.errors.cardId && err.name && err.name === 'ValidationError') {
+        if (err.code && err.code === 'CARD_ALREADY_EXISTS') {
           return res
             .status(409)
-            .json({ code: 'CARD_ALREADY_EXISTS', message: err.errors.cardId.message });
+            .json({ code: err.code, message: err.message });
         }
-        console.error(err);
+        console.log(err);
         return res.status(500).end();
       });
   }
@@ -50,7 +50,7 @@ export const balance = (req, res) => {
   if (req && req.params && req.params.id) {
     return getCard(req.params.id)
       .then(card => {
-        if (card === null) return res.status(409).json(CARD_NOT_FOUND);
+        if (card === undefined) return res.status(409).json(CARD_NOT_FOUND);
         return res.status(200).json({ balance: card.balance });
       })
       .catch(err => {
@@ -62,14 +62,15 @@ export const balance = (req, res) => {
 };
 
 export const deposit = async (req, res) => {
-  if (req && req.params && req.params.id && req.body && req.body.amount) {
+  if (req && req.params && req.params.id && req.body && req.body.amount && req.body.amount > 0) {
     try {
       const card = await amendBalance(req.params.id, req.body.amount);
 
-      if (card === null) return res.status(409).json(CARD_NOT_FOUND);
-
       return res.status(200).json({ balance: card.balance });
     } catch (err) {
+      if (err.code && err.code === 'ValidationException') {
+        return res.status(409).json(CARD_NOT_FOUND);
+      }
       console.error(err);
       return res.status(500).end();
     }
@@ -78,23 +79,23 @@ export const deposit = async (req, res) => {
 };
 
 export const withdraw = async (req, res) => {
-  if (req && req.params && req.params.id && req.body && req.body.amount) {
+  if (req && req.params && req.params.id && req.body && req.body.amount && req.body.amount > 0) {
     const { params: { id }, body: { amount } } = req;
     try {
-      const card = await getCard(id);
+      const updatedCard = await amendBalance(id, -amount);
 
-      if (card === null) return res.status(409).json(CARD_NOT_FOUND);
+      return res.status(200).json({ balance: updatedCard.balance });
+    } catch (err) {
+      if (err.code && err.code === 'ValidationException') {
+        return res.status(409).json(CARD_NOT_FOUND);
+      }
 
-      if (card.balance - amount < 0) {
+      if (err.code && err.code === 'ConditionalCheckFailedException') {
         return res
           .status(409)
           .json({ code: 'INSUFFICIENT_BALANCE', message: 'Not enough credits on the card' });
       }
 
-      const updatedCard = await amendBalance(id, -amount);
-
-      return res.status(200).json({ balance: updatedCard.balance });
-    } catch (err) {
       console.error(err);
       return res.status(500).end();
     }

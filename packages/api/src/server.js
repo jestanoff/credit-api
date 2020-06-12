@@ -1,6 +1,6 @@
 import express from 'express';
 import morgan from 'morgan';
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
 import https from 'https';
 import fs from 'fs';
 import helmet from 'helmet';
@@ -11,22 +11,23 @@ import config from './configuration/config.js';
 import * as card from './routes/card.js';
 import homepage from './routes/homepage.js';
 
+
 const server = () => {
   const app = express();
-  const dbUri = process.env.DB || 'mongodb://localhost:27017/carwash';
+  // const dbUri = process.env.DB || 'mongodb://localhost:27017/carwash';
   const port = Number(process.env.PORT) || 443;
 
   app.set('Secret', config.secret); // Sets authentication secret
 
   // Database setup
-  mongoose.connect(dbUri, {
-    password: config.dbPassword,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    useNewUrlParser: true,
-  });
-  mongoose.connection.on('error', console.error);
-  mongoose.connection.once('open', () => console.log('Connected to MongoDB'));
+  // mongoose.connect(dbUri, {
+  //   password: config.dbPassword,
+  //   useCreateIndex: true,
+  //   useFindAndModify: false,
+  //   useNewUrlParser: true,
+  // });
+  // mongoose.connection.on('error', console.error);
+  // mongoose.connection.once('open', () => console.log('Connected to MongoDB'));
 
   // Middlewares
   app.use(helmet()); // Helps secure the app by setting various http headers
