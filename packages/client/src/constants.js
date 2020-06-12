@@ -5,7 +5,7 @@ export const COMMANDS = {
   READ: '01',
 };
 export const REQUEST_TIMEOUT = 5000; // 5 seconds
-export const MAX_DEPOSIT = 50;
+export const MAX_DEPOSIT = 9999;
 export const SERIAL_PORT_PATH = '/dev/ttyAMA0';
 export const CHECKSUM_ERROR = '0000';
 export const CARD_NOT_FOUND_ERROR = 'ff00';
