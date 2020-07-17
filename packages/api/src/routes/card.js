@@ -2,17 +2,17 @@ import {
   amendBalance, createCard, getCard, getCards,
 } from '../models/card.js';
 
-const CARD_NOT_FOUND = {
-  code: 'CARD_NOT_FOUND',
-  message: "Card with this id doesn't exist",
-};
+const BAD_REQUEST = { error: 'Bad request' };
 
-export const list = (req, res) => getCards()
-  .then(cards => res.status(200).json(cards))
-  .catch(err => {
+export const list = (req, res) => {
+  try {
+    const cards = getCards();
+    return res.status(200).json(cards);
+  } catch (err) {
     console.error(err);
-    return res.status(500).end();
-  });
+    return res.status(500).json({ error: err.toString() }).end();
+  }
+};
 
 export const create = (req, res) => {
   if (req && req.params && req.params.id) {
@@ -25,40 +25,40 @@ export const create = (req, res) => {
             .json({ code: err.code, message: err.message });
         }
         console.log(err);
-        return res.status(500).end();
+        return res.status(500).json({ error: err.toString() }).end();
       });
   }
-  return res.status(400).end();
+  return res.status(400).json(BAD_REQUEST).end();
 };
 
 export const show = (req, res) => {
   if (req && req.params && req.params.id) {
     return getCard(req.params.id)
       .then(card => {
-        if (!card) return res.status(409).json(CARD_NOT_FOUND);
+        if (!card) return res.status(404);
         return res.status(200).json(card);
       })
       .catch(err => {
         console.error(err);
-        return res.status(500).end();
+        return res.status(500).json({ error: err.toString() }).end();
       });
   }
-  return res.status(400).end();
+  return res.status(400).json(BAD_REQUEST).end();
 };
 
 export const balance = (req, res) => {
   if (req && req.params && req.params.id) {
     return getCard(req.params.id)
       .then(card => {
-        if (card === undefined) return res.status(409).json(CARD_NOT_FOUND);
+        if (card === undefined) return res.status(404);
         return res.status(200).json({ balance: card.balance });
       })
       .catch(err => {
         console.error(err);
-        return res.status(500).end();
+        return res.status(500).json({ error: err.toString() }).end();
       });
   }
-  return res.status(400).end();
+  return res.status(400).json(BAD_REQUEST).end();
 };
 
 export const deposit = async (req, res) => {
@@ -69,13 +69,13 @@ export const deposit = async (req, res) => {
       return res.status(200).json({ balance: card.balance });
     } catch (err) {
       if (err.code && err.code === 'ValidationException') {
-        return res.status(409).json(CARD_NOT_FOUND);
+        return res.status(404);
       }
       console.error(err);
-      return res.status(500).end();
+      return res.status(500).json({ error: err.toString() }).end();
     }
   }
-  return res.status(400).end();
+  return res.status(400).json(BAD_REQUEST).end();
 };
 
 export const withdraw = async (req, res) => {
@@ -87,7 +87,7 @@ export const withdraw = async (req, res) => {
       return res.status(200).json({ balance: updatedCard.balance });
     } catch (err) {
       if (err.code && err.code === 'ValidationException') {
-        return res.status(409).json(CARD_NOT_FOUND);
+        return res.status(404);
       }
 
       if (err.code && err.code === 'ConditionalCheckFailedException') {
@@ -97,8 +97,8 @@ export const withdraw = async (req, res) => {
       }
 
       console.error(err);
-      return res.status(500).end();
+      return res.status(500).json({ error: err.toString() }).end();
     }
   }
-  return res.status(400).end();
+  return res.status(400).json(BAD_REQUEST).end();
 };
