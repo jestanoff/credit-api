@@ -1,5 +1,5 @@
 export default {
-  dbPassword: 'hercoherco',
-  dbUsername: 'carwash',
-  secret: '_@4eB59s9h!nJWm4tzF.Zve@9MXZ35sBjAYRcs2P!VDcR',
+  dbPassword: process.env.DB_PASSWORD,
+  dbUsername: process.env.DB_USERNAME,
+  secret: process.env.DB_SECRET,
 };
