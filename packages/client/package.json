@@ -30,7 +30,7 @@
     "@serialport/parser-byte-length": "^9.0.0",
     "@serialport/parser-delimiter": "^9.0.0",
     "@serialport/parser-inter-byte-timeout": "^9.0.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "serialport": "^9.0.0"
   },
   "devDependencies": {
