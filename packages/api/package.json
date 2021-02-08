@@ -26,7 +26,7 @@
   },
   "homepage": "https://gitlab.com/jestanoff/carwash-api#readme",
   "dependencies": {
-    "dynamoose": "^2.2.1",
+    "dynamoose": "^2.7.0",
     "express": "^4.16.4",
     "helmet": "^3.15.0",
     "joi": "^14.0.6",
